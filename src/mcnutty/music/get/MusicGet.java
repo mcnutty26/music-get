@@ -62,7 +62,7 @@ public class MusicGet {
 		    	}
 		    	Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
 		    } else {
-		    	System.out.println("Nothing is queued!");
+		    	//System.out.println("Nothing is queued!");
 		    }
 	    	Thread.sleep(1000);
 		}

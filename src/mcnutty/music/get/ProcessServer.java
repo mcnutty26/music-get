@@ -39,6 +39,8 @@ public class ProcessServer extends AbstractHandler {
   		}
     	
         response.setContentType("text/html; charset=utf-8");
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        //response.addHeader("Access-Control-Allow-Methods", "POST");
         response.setStatus(HttpServletResponse.SC_OK);
  
         PrintWriter out = response.getWriter();
@@ -47,13 +49,17 @@ public class ProcessServer extends AbstractHandler {
         case "/list":
         	list(out);
         	break;
+        case "/current":
+        	current(out);
+        	break;
         case "/add":
         	add(request);
+        	redirect(request, response);
         	break;
         case "/remove":
         	remove(request);
         default:
-        	out.println("<form action=/add method='post' enctype='multipart/form-data'><input type='file' name='file'><button type='submit'>SUBMIT</button></form>");
+        	out.println("Welcome to the music-get backend!");
         }
  
         baseRequest.setHandled(true);
@@ -94,6 +100,14 @@ public class ProcessServer extends AbstractHandler {
     	out.println(json_array_list(process_queue.bucket_queue));
     }
     
+    void current(PrintWriter out) {
+    	try {
+    		out.println(process_queue.bucket_played.get(process_queue.bucket_played.size() - 1).real_name);
+    	} catch (Exception e) {
+    		out.println("Nothing!");
+    	}
+    }
+    
     void last(PrintWriter out) {
     	out.println(json_array_list(process_queue.bucket_played));
     }
@@ -113,16 +127,27 @@ public class ProcessServer extends AbstractHandler {
     }
     
     void remove(HttpServletRequest request) {
+    	QueueItem match = null;
     	for (QueueItem item : process_queue.bucket_queue) {
-    		try {
-				if (item.disk_name.equals(request.getPart("guid")) && item.ip.equals(request.getRemoteAddr().toString())) {
-					process_queue.delete_item(item);
-					System.out.println(item.ip + " deleted item " + item.real_name);
-				}
-			} catch (IOException | ServletException e) {
-				e.printStackTrace();
+			if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getRemoteAddr().toString())) {
+				match = item;
 			}
     	}
+    	if (match != null) {
+    		process_queue.delete_item(match);
+			System.out.println(match.ip + " deleted item " + match.real_name);
+    	}
+    }
+    
+    void redirect(HttpServletRequest request, HttpServletResponse response) {
+    	String ip = request.getLocalAddr();
+    	String url = "http://" + ip + "/index.php";
+    	response.setContentLength(0);
+    	try {
+			response.sendRedirect(url);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
 }
