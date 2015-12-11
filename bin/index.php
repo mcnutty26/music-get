@@ -1,6 +1,9 @@
 <?php
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
     $server_ip = $_SERVER['SERVER_ADDR'];
-    $client_ip = $_SERVER['REMOTE_ADDR']
+    $client_ip = $_SERVER['REMOTE_ADDR'];
 ?>
 
 <!DOCTYPE html>
@@ -28,7 +31,7 @@
       <script src="dist/js/vendor/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body>
+  <body onload="setTimeout(refresh, 60000)">
     <div class="container">
       <div class="row demo-row">
         <div class="col-xs-12">
@@ -62,12 +65,35 @@
             </div>
             <div class="col-xs-6">
               <div class="form-group">
-                <input type="submit" class="btn btn-primary btn-lg btn-block">
+                <input type="submit" class="btn btn-primary btn-lg btn-block" value="Upload File">
               </div>
             </div>
           </div>
         </form>
+        <form action="http://<?=$server_ip?>:8080/url" method="post" enctype="multipart/form-data">
+          <div class="row">
+            <div class="col-xs-6">
+              <div class="form-group">
+                <input type="text" class="form-control" name="url" placeholder="Youtube/Vimeo etc. URL"/>
+              </div>
+            </div>
+            <div class="col-xs-6">
+              <div class="form-group">
+                <input type="submit" class="btn btn-primary btn-lg btn-block" value="Upload from URL">
+              </div>
+            </div>
+          </div>
         <div class="form-group">
+
+        <?php
+            $json = file_get_contents("http://localhost:8080/downloading");
+            $data = json_decode($json, true);
+            foreach ($data as $item) {
+                if ($client_ip == $item['ip']) {
+                    echo "Downloading " . $item['name'];
+                }
+            }
+        ?>
         
         <h6>Currently playing <?=file_get_contents("http://localhost:8080/current");?></h6>
         
@@ -80,14 +106,45 @@
         <?php
             $json = file_get_contents("http://localhost:8080/list");
             $data = json_decode($json, true);
+            $queue = array();
+            $queue_temp = array();
+
             foreach ($data as $item) {
-                echo "<tr>";
-                echo "<td>" . $item['name'] . "</td>";
-                echo "<td>" . $item['ip'] . "</td>";
-                $guid = $item['guid'];
-                echo "<td>" . ($client_ip == $item['ip'] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
-                echo "</tr>";
-            } ?>
+                array_push($queue, array($item['name'], $item['ip'], $item['guid']));
+            }
+
+            while (count($queue) > 0) {
+                $ips = array();
+                $bucket = array();
+                foreach ($queue as $item) {
+                    if (!in_array($item[1], $ips)) {
+                        array_push($ips, $item[1]);
+                        array_push($bucket, $item);
+                    } else {
+                        array_push($queue_temp, $item);
+                    }
+                }
+
+                foreach ($bucket as $item) {
+                    echo "<tr>";
+                    echo "<td>" . $item[0] . "</td>";
+                    echo "<td>" . $item[1] . "</td>";
+                    $guid = $item[2];
+                    echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
+                    echo "</tr>";
+                }
+                echo "<tr><td>&nbsp;</td><td></td><td></td></tr>";
+
+                unset($queue);
+                $queue = array();
+                unset($bucket);
+                $bucket = array();
+                $queue = $queue_temp;
+                unset($queue_temp);
+                $queue_temp = array();
+            }
+
+             ?>
         </div>
       </div>
 
@@ -104,7 +161,11 @@
                     method: 'POST',
                     data: {'guid': arg}})
                     location.replace('http://<?=$server_ip?>');
-              }
+        }
+        
+        function refresh() {
+            location.replace('http://<?=$server_ip?>');
+        }
     </script>
 
     <script>

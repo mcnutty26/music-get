@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
@@ -49,6 +51,9 @@ public class ProcessServer extends AbstractHandler {
         case "/list":
         	list(out);
         	break;
+        case "/last":
+        	last(out);
+        	break;
         case "/current":
         	current(out);
         	break;
@@ -56,8 +61,15 @@ public class ProcessServer extends AbstractHandler {
         	add(request);
         	redirect(request, response);
         	break;
+        case "/url":
+        	url(request);
+        	redirect(request, response);
+        	break;
+        case "/downloading":
+        	downloading(out);
         case "/remove":
         	remove(request);
+        	break;
         default:
         	out.println("Welcome to the music-get backend!");
         }
@@ -124,6 +136,16 @@ public class ProcessServer extends AbstractHandler {
 		} catch (IOException | ServletException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    void url(HttpServletRequest request) {
+    	YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
+    	ExecutorService executor = Executors.newCachedThreadPool();
+        executor.submit(download);
+    }
+    
+    void downloading(PrintWriter out) {
+    	out.println(json_array_list(process_queue.bucket_youtube));
     }
     
     void remove(HttpServletRequest request) {

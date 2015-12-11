@@ -6,11 +6,13 @@ public class ProcessQueue {
 	
 	public ArrayList<QueueItem> bucket_queue; 
 	public ArrayList<QueueItem> bucket_played;
+	public ArrayList<QueueItem> bucket_youtube;
 	
 	public ProcessQueue() {
 		//store items which have been queued and items which have been played this bucket
 		bucket_queue = new ArrayList<QueueItem>();
 		bucket_played = new ArrayList<QueueItem>();
+		bucket_youtube = new ArrayList<QueueItem>();
 	}
 	
 	//add a new item to the queue
@@ -20,13 +22,13 @@ public class ProcessQueue {
 	
 	//return the next item in the bucket to be played
 	public QueueItem next_item() {
-		if (bucket_queue.isEmpty() == false) {
+		if (!bucket_queue.isEmpty()) {
 			ArrayList<String> played_ips = new ArrayList<>();
 			for (QueueItem item : bucket_played) {
 				played_ips.add(item.ip);
 			}
 			for (QueueItem item : bucket_queue) {
-				if (played_ips.contains(item.ip) == false) {
+				if (!played_ips.contains(item.ip)) {
 					return item;
 				}
 			}

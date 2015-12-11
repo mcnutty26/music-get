@@ -51,18 +51,17 @@ public class MusicGet {
 		//read items from the queue and play them
 	    while (true) {
 	    	QueueItem next_item = process_queue.next_item();
-	    	if (next_item.equals(new QueueItem()) == false) {
+	    	if (!next_item.equals(new QueueItem())) {
 	    		System.out.println("Playing " + next_item.real_name);
 		    	process_queue.set_played(next_item);
-		    	Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 " + System.getProperty("java.io.tmpdir") + directory + "/" + next_item.disk_name);
+		    	Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
+		    			+ System.getProperty("java.io.tmpdir") + directory + "/" + next_item.disk_name);
 
 		    	try {
-		    		p.waitFor();		    		
+		    		p.waitFor();
+		    		Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
 		    	} catch (Exception ex) {
 		    	}
-		    	Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
-		    } else {
-		    	//System.out.println("Nothing is queued!");
 		    }
 	    	Thread.sleep(1000);
 		}
