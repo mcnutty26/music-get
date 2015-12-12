@@ -21,13 +21,18 @@ public class YoutubeDownload implements Runnable {
 	
 	@Override
 	public void run() {
+		if (URL.contains("youtube.com") && URL.contains("&list")) {
+			URL = URL.substring(0, URL.indexOf("&list"));
+		}
+		
+		
 		System.out.println("Starting download of video " + URL + " queued by " + ip);
 		QueueItem temp = new QueueItem("null", URL, ip);
 		process_queue.bucket_youtube.add(temp);
 		String guid = UUID.randomUUID().toString();
 		ProcessBuilder pb = new ProcessBuilder(
                 Paths.get("").toAbsolutePath().toString() + "/youtube-dl", "--get-filename"
-                , "-o%(title)s", "--restrict-filenames", URL);
+                , "-o%(title)s", "--restrict-filenames", "--no-playlist", URL);
         Process p;
 		try {
 			p = pb.start();
@@ -43,8 +48,8 @@ public class YoutubeDownload implements Runnable {
 			dl = downloader.start();
 			dl.waitFor();
 			
-			String extension = ""; //sb.toString().substring(sb.toString().lastIndexOf('.'), sb.toString().length());
-			String real_name = sb.toString(); //.substring(0, sb.toString().lastIndexOf(extension));
+			String extension = "";
+			String real_name = sb.toString();
 			process_queue.new_item(new QueueItem(guid + extension, real_name, ip));
 			System.out.println("Downloaded file " + real_name + " for " + ip);
 			process_queue.bucket_youtube.remove(temp);

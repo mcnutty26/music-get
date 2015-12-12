@@ -62,6 +62,8 @@ public class MusicGet {
 		    		Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
 		    	} catch (Exception ex) {
 		    	}
+		    } else {
+		    	process_queue.bucket_played.clear();
 		    }
 	    	Thread.sleep(1000);
 		}

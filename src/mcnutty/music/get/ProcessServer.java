@@ -1,5 +1,7 @@
 package mcnutty.music.get;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -70,6 +72,12 @@ public class ProcessServer extends AbstractHandler {
         case "/remove":
         	remove(request);
         	break;
+        case "/admin/kill":
+        	kill(request);
+        	break;
+        case "/admin/remove":
+        	admin_remove(request);
+        	break;
         default:
         	out.println("Welcome to the music-get backend!");
         }
@@ -116,7 +124,7 @@ public class ProcessServer extends AbstractHandler {
     	try {
     		out.println(process_queue.bucket_played.get(process_queue.bucket_played.size() - 1).real_name);
     	} catch (Exception e) {
-    		out.println("Nothing!");
+    		out.println("nothing!");
     	}
     }
     
@@ -170,6 +178,34 @@ public class ProcessServer extends AbstractHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    void kill(HttpServletRequest request) {
+    	try {
+			Runtime.getRuntime().exec("killall mplayer");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    void admin_remove(HttpServletRequest request) {
+    	QueueItem match = null;
+    	for (QueueItem item : process_queue.bucket_queue) {
+			if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getRemoteAddr().toString())) {
+				match = item;
+			}
+    	}
+    	BufferedReader br;
+    	String pw = "";
+		try {
+			br = new BufferedReader(new FileReader("config.ini"));
+			pw = br.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	if (match != null && request.getParameter("pw").equals(pw)) {
+    		process_queue.delete_item(match);
+    	}
     }
     
 }

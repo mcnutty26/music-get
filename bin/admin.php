@@ -1,8 +1,6 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-    $pw = file_get_contents("config.ini");
+    $server_ip = $_SERVER['SERVER_ADDR'];
+    $pw = trim(file_get_contents("config.ini"));
     session_start();
     if ($_POST['login'] == 2) {
         session_destroy();
@@ -11,7 +9,6 @@
     if ($_POST['pw'] == $pw) {
         $_SESSION['login'] = $pw;
     }
-
 ?>
 
 <!DOCTYPE html>
@@ -60,16 +57,13 @@
       </div> <!-- /row -->
 
       <div class="demo-type-example">
-        <h3>Bringing you LAN classics since 2015</h3>
+        <h3>Admin Panel</h3>
       </div>
 
       <div class="login-form">
-        <?php if ($session['pw'] == $pw) { ?>
+        <?php if ($_SESSION['login'] == $pw) { ?>
         <div class="row">
-          <h6>Currently playing <?=file_get_contents("http://localhost:8080/current");?></h6>
-          <input type="submit" class="btn btn-error btn-lg btn-block" onclick="remove_current()" value="Kill current item">
-        </div>
-        <div class="row">
+          <div class="col-xs-12">
 		  <table>
             <tr>
               <td></td>
@@ -113,13 +107,19 @@
                 $queue_temp = array();
             }
              ?>
-		  </table>
+          </table>
+          </div>
 		</div>
         <div class="row">
-		  <form method="post" action="admin.php">
-            <input type="hidden" name="login" value="2">
-            <input type="submit" class="btn btn-danger btn-lg btn-block" value="Log out">
-          </form>
+          <div class="col-xs-6">
+            <input type="submit" class="btn btn-danger btn-lg btn-block" onclick="remove_current()" value="Kill current item">
+          </div>
+          <div class="col-xs-6">
+		    <form method="post" action="admin.php">
+              <input type="hidden" name="login" value="2">
+              <input type="submit" class="btn btn-primary btn-lg btn-block" value="Log out">
+            </form>
+          </div>
 		</div>
         <?php } else { ?>
         <form method="post" action="admin.php">
@@ -142,14 +142,14 @@
         function remove_item(arg) {
             $.ajax({url: 'http://<?=$server_ip?>:8080/admin/remove',
                 method: 'POST',
-                data: {'guid': arg, 'pw' : <?=$pw?>}})
-                location.replace('http://<?=$server_ip?>');
+                data: {'guid': arg, 'pw' : '<?=$pw?>'}})
+                location.replace('http://<?=$server_ip?>/admin.php');
         }
         function remove_current() {
             $.ajax({url: 'http://<?=$server_ip?>:8080/admin/kill',
                 method: 'POST',
-                data: {'pw' : <?=$pw?>}})
-                location.replace('http://<?=$server_ip?>');
+                data: {'pw' : '<?=$pw?>'}})
+                location.replace('http://<?=$server_ip?>/admin.php');
         }
     </script>
 

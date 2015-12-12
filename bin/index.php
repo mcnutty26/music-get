@@ -1,7 +1,4 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
     $server_ip = $_SERVER['SERVER_ADDR'];
     $client_ip = $_SERVER['REMOTE_ADDR'];
 ?>
