@@ -2,8 +2,16 @@
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
-    $server_ip = $_SERVER['SERVER_ADDR'];
-    $client_ip = $_SERVER['REMOTE_ADDR'];
+    $pw = file_get_contents("config.ini");
+    session_start();
+    if ($_POST['login'] == 2) {
+        session_destroy();
+        header( 'Location: admin.php' ) ;
+    }
+    if ($_POST['pw'] == $pw) {
+        $_SESSION['login'] = $pw;
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -56,48 +64,13 @@
       </div>
 
       <div class="login-form">
-        <form action="http://<?=$server_ip?>:8080/add" method="post" enctype="multipart/form-data">
-          <div class="row">
-            <div class="col-xs-6">
-              <div class="form-group">
-                <input type="file" class="form-control" name="file"/>
-              </div>
-            </div>
-            <div class="col-xs-6">
-              <div class="form-group">
-                <input type="submit" class="btn btn-primary btn-lg btn-block" value="Upload File">
-              </div>
-            </div>
-          </div>
-        </form>
-        <form action="http://<?=$server_ip?>:8080/url" method="post" enctype="multipart/form-data">
-          <div class="row">
-            <div class="col-xs-6">
-              <div class="form-group">
-                <input type="text" class="form-control" name="url" placeholder="Youtube/Vimeo etc. URL"/>
-              </div>
-            </div>
-            <div class="col-xs-6">
-              <div class="form-group">
-                <input type="submit" class="btn btn-primary btn-lg btn-block" value="Upload from URL">
-              </div>
-            </div>
-          </div>
-        <div class="form-group">
-
-        <?php
-            $json = file_get_contents("http://localhost:8080/downloading");
-            $data = json_decode($json, true);
-            foreach ($data as $item) {
-                if ($client_ip == $item['ip']) {
-                    echo "Downloading " . $item['name'];
-                }
-            }
-        ?>
-        
-        <h6>Currently playing <?=file_get_contents("http://localhost:8080/current");?></h6>
-        
-        <table>
+        <?php if ($session['pw'] == $pw) { ?>
+        <div class="row">
+          <h6>Currently playing <?=file_get_contents("http://localhost:8080/current");?></h6>
+          <input type="submit" class="btn btn-error btn-lg btn-block" onclick="remove_current()" value="Kill current item">
+        </div>
+        <div class="row">
+		  <table>
             <tr>
               <td></td>
               <td></td>
@@ -108,11 +81,9 @@
             $data = json_decode($json, true);
             $queue = array();
             $queue_temp = array();
-
             foreach ($data as $item) {
                 array_push($queue, array($item['name'], $item['ip'], $item['guid']));
             }
-
             while (count($queue) > 0) {
                 $ips = array();
                 $bucket = array();
@@ -124,17 +95,15 @@
                         array_push($queue_temp, $item);
                     }
                 }
-
                 foreach ($bucket as $item) {
                     echo "<tr>";
                     echo "<td>" . $item[0] . "</td>";
                     echo "<td>" . $item[1] . "</td>";
                     $guid = $item[2];
-                    echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
+                    echo "<td><a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a></td>";
                     echo "</tr>";
                 }
                 echo "<tr><td>&nbsp;</td><td></td><td></td></tr>";
-
                 unset($queue);
                 $queue = array();
                 unset($bucket);
@@ -143,9 +112,23 @@
                 unset($queue_temp);
                 $queue_temp = array();
             }
-            ?>
-          </table>
-        </div>
+             ?>
+		  </table>
+		</div>
+        <div class="row">
+		  <form method="post" action="admin.php">
+            <input type="hidden" name="login" value="2">
+            <input type="submit" class="btn btn-danger btn-lg btn-block" value="Log out">
+          </form>
+		</div>
+        <?php } else { ?>
+        <form method="post" action="admin.php">
+          <div class="form-group">
+            <input type="password" class="form-control login-field" value="" placeholder="Password" id="pw" name="pw" required />
+          </div>
+            <input class="btn btn-primary btn-lg btn-block" type="submit" value="Login">
+        </form>
+        <?php } ?>
       </div>
 
     </div> <!-- /container -->
@@ -157,10 +140,16 @@
     
     <script>
         function remove_item(arg) {
-                $.ajax({url: 'http://<?=$server_ip?>:8080/remove',
-                    method: 'POST',
-                    data: {'guid': arg}})
-                    location.replace('http://<?=$server_ip?>');
+            $.ajax({url: 'http://<?=$server_ip?>:8080/admin/remove',
+                method: 'POST',
+                data: {'guid': arg, 'pw' : <?=$pw?>}})
+                location.replace('http://<?=$server_ip?>');
+        }
+        function remove_current() {
+            $.ajax({url: 'http://<?=$server_ip?>:8080/admin/kill',
+                method: 'POST',
+                data: {'pw' : <?=$pw?>}})
+                location.replace('http://<?=$server_ip?>');
         }
     </script>
 
