@@ -87,7 +87,7 @@
             $data = json_decode($json, true);
             foreach ($data as $item) {
                 if ($client_ip == $item['ip']) {
-                    echo "Downloading " . $item['name'];
+                    echo "Downloading " . $item['name'] . "<br>";
                 }
             }
         ?>

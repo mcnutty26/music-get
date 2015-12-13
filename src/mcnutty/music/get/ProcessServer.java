@@ -32,6 +32,7 @@ public class ProcessServer extends AbstractHandler {
 		this.directory = directory;
 	}
  
+	//all requests are routed through this method
     public void handle( String target,
                         Request baseRequest,
                         HttpServletRequest request,
@@ -44,11 +45,11 @@ public class ProcessServer extends AbstractHandler {
     	
         response.setContentType("text/html; charset=utf-8");
         response.addHeader("Access-Control-Allow-Origin", "*");
-        //response.addHeader("Access-Control-Allow-Methods", "POST");
         response.setStatus(HttpServletResponse.SC_OK);
  
         PrintWriter out = response.getWriter();
         
+        //select which endpoint the user requested
         switch(target) {
         case "/list":
         	list(out);
@@ -85,8 +86,10 @@ public class ProcessServer extends AbstractHandler {
         baseRequest.setHandled(true);
     }
     
+    //allow multi part forms (required for file uploads)
     private static final MultipartConfigElement MULTI_PART_CONFIG = new MultipartConfigElement(System.getProperty("java.io.tmpdir"));
     
+    //get the name of an uploaded file
     private String extractFileName(Part part) {
         String contentDisp = part.getHeader("content-disposition");
         String[] items = contentDisp.split(";");
@@ -98,9 +101,9 @@ public class ProcessServer extends AbstractHandler {
         return "";
     }
     
+    //convert an ArrayList into a JSON array
     JSONArray json_array_list(ArrayList<QueueItem> queue) {
     	JSONArray output = new JSONArray();
-    	
     	try {
 	    	for (QueueItem item : queue) {
 	    		JSONObject object = new JSONObject();
@@ -111,15 +114,16 @@ public class ProcessServer extends AbstractHandler {
 	    	}
     	} catch (JSONException e) {
 			e.printStackTrace();
-		} finally {
-    	}
+		}
     	return output;
     }
     
+    //list the currently queued items
     void list(PrintWriter out) {
     	out.println(json_array_list(process_queue.bucket_queue));
     }
     
+    //list the name of the currently playing item 
     void current(PrintWriter out) {
     	try {
     		out.println(process_queue.bucket_played.get(process_queue.bucket_played.size() - 1).real_name);
@@ -128,10 +132,12 @@ public class ProcessServer extends AbstractHandler {
     	}
     }
     
+    //list the items which have been played this bucket
     void last(PrintWriter out) {
     	out.println(json_array_list(process_queue.bucket_played));
     }
     
+    //add an uploaded file to the queue 
     void add(HttpServletRequest request) {
     	String guid = UUID.randomUUID().toString();
     	Part uploaded_file;
@@ -148,6 +154,7 @@ public class ProcessServer extends AbstractHandler {
 		}
     }
     
+    //download a video at the supplied URL
     void url(HttpServletRequest request) {
     	if (!request.getParameter("url").equals("")) {
     		YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
@@ -156,10 +163,12 @@ public class ProcessServer extends AbstractHandler {
     	}
     }
     
+    //list the currently downloading items
     void downloading(PrintWriter out) {
     	out.println(json_array_list(process_queue.bucket_youtube));
     }
     
+    //remove an item from the queue
     void remove(HttpServletRequest request) {
     	QueueItem match = null;
     	for (QueueItem item : process_queue.bucket_queue) {
@@ -173,6 +182,7 @@ public class ProcessServer extends AbstractHandler {
     	}
     }
     
+    //redirect the requester back to the front end
     void redirect(HttpServletRequest request, HttpServletResponse response) {
     	String ip = request.getLocalAddr();
     	String url = "http://" + ip + "/index.php";
@@ -184,6 +194,7 @@ public class ProcessServer extends AbstractHandler {
 		}
     }
     
+    //admin: kill the currently playing item
     void kill(HttpServletRequest request) {
     	BufferedReader br;
     	String pw = "";
@@ -198,6 +209,7 @@ public class ProcessServer extends AbstractHandler {
 		}
     }
     
+    //admin: remove any item from the queue
     void admin_remove(HttpServletRequest request) {
     	QueueItem match = null;
     	for (QueueItem item : process_queue.bucket_queue) {

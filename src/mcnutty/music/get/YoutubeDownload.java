@@ -21,15 +21,18 @@ public class YoutubeDownload implements Runnable {
 	
 	@Override
 	public void run() {
+		//prevent downloading the wrong video if the link was part of a playlist
 		if (URL.contains("youtube.com") && URL.contains("&list")) {
 			URL = URL.substring(0, URL.indexOf("&list"));
 		}
 		
-		
+		//set the item as downloading
 		System.out.println("Starting download of video " + URL + " queued by " + ip);
 		QueueItem temp = new QueueItem("null", URL, ip);
 		process_queue.bucket_youtube.add(temp);
 		String guid = UUID.randomUUID().toString();
+		
+		//get the name of the item
 		ProcessBuilder pb = new ProcessBuilder(
                 Paths.get("").toAbsolutePath().toString() + "/youtube-dl", "--get-filename"
                 , "-o%(title)s", "--restrict-filenames", "--no-playlist", URL);
@@ -42,6 +45,8 @@ public class YoutubeDownload implements Runnable {
         	while ((line = br.readLine()) != null) {
 			    sb.append(line);
 			}
+        	
+        	//download the actual file and add it to the queue
         	if (!sb.toString().equals("")) {
         		ProcessBuilder downloader = new ProcessBuilder(Paths.get("").toAbsolutePath().toString() + "/youtube-dl"
         				, "-o", System.getProperty("java.io.tmpdir") + directory + guid, "--restrict-filenames", "-f mp4",URL);
@@ -56,6 +61,8 @@ public class YoutubeDownload implements Runnable {
         	} else {
         		System.out.println("Could not download video " + URL + " queued by " + ip);
         	}
+        	
+        	//set the download as completed 
 			process_queue.bucket_youtube.remove(temp);
 		} catch (Exception e) {
 			e.printStackTrace();
