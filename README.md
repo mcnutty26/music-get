@@ -1,6 +1,9 @@
 # music-get
 
-One of the (many) music server implementations for UWCS. While the other options out there may be shinier, music-get is intended to be an easily maintainable alternative prioritising simplicity over extra features. Playing works on a round robin system - each bucket contains at most one item queued by a single IP. The back end binds to port 8080.
+One of the (many) music server implementations for UWCS. While the other options out there may be shinier, music-get is intended to be an easily maintainable alternative prioritising simplicity over extra features. Playing works on a round robin system - each bucket contains at most one item queued by a single IP.
+
+##Documentation
+See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information on how music-get works.
 
 ##Setup
 * create config.ini in bin, and have it contain the admin password
@@ -20,9 +23,9 @@ One of the (many) music server implementations for UWCS. While the other options
 * /admin/remove accepts a guid (from /list) and a password via post and removes that guid from the queue
 
 ##Dependencies:
-* Jetty (included)
-* JSON-java (included)
-* youtube-dl (included)
+* Jetty (included in music-get.jar)
+* JSON-java (included in music-get.jar)
+* youtube-dl (included in music-get.jar)
 * Java 8
 * MPlayer
 * Apache
