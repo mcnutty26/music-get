@@ -139,17 +139,21 @@ public class ProcessServer extends AbstractHandler {
 			uploaded_file = request.getPart("file");;
 			uploaded_file.write(directory + guid);
 			QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
-	    	process_queue.new_item(new_item);
-	    	System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
+			if (!new_item.real_name.equals("")) {
+				process_queue.new_item(new_item);
+				System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
+			}
 		} catch (IOException | ServletException e) {
 			e.printStackTrace();
 		}
     }
     
     void url(HttpServletRequest request) {
-    	YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
-    	ExecutorService executor = Executors.newCachedThreadPool();
-        executor.submit(download);
+    	if (!request.getParameter("url").equals("")) {
+    		YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
+    		ExecutorService executor = Executors.newCachedThreadPool();
+    		executor.submit(download);
+    	}
     }
     
     void downloading(PrintWriter out) {
@@ -181,8 +185,14 @@ public class ProcessServer extends AbstractHandler {
     }
     
     void kill(HttpServletRequest request) {
-    	try {
-			Runtime.getRuntime().exec("killall mplayer");
+    	BufferedReader br;
+    	String pw = "";
+		try {
+			br = new BufferedReader(new FileReader("config.ini"));
+			pw = br.readLine();
+			if (request.getParameter("pw").equals(pw)) {
+	    			Runtime.getRuntime().exec("killall mplayer");
+	    	}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -191,7 +201,7 @@ public class ProcessServer extends AbstractHandler {
     void admin_remove(HttpServletRequest request) {
     	QueueItem match = null;
     	for (QueueItem item : process_queue.bucket_queue) {
-			if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getRemoteAddr().toString())) {
+			if (item.disk_name.equals(request.getParameter("guid"))) {
 				match = item;
 			}
     	}

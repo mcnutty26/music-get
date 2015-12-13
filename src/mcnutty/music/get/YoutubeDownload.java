@@ -42,16 +42,20 @@ public class YoutubeDownload implements Runnable {
         	while ((line = br.readLine()) != null) {
 			    sb.append(line);
 			}
-        	ProcessBuilder downloader = new ProcessBuilder(Paths.get("").toAbsolutePath().toString() + "/youtube-dl"
-        			, "-o", System.getProperty("java.io.tmpdir") + directory + guid, "--restrict-filenames", "-f mp4",URL);
-        	Process dl;
-			dl = downloader.start();
-			dl.waitFor();
+        	if (!sb.toString().equals("")) {
+        		ProcessBuilder downloader = new ProcessBuilder(Paths.get("").toAbsolutePath().toString() + "/youtube-dl"
+        				, "-o", System.getProperty("java.io.tmpdir") + directory + guid, "--restrict-filenames", "-f mp4",URL);
+        		Process dl;
+        		dl = downloader.start();
+        		dl.waitFor();
 			
-			String extension = "";
-			String real_name = sb.toString();
-			process_queue.new_item(new QueueItem(guid + extension, real_name, ip));
-			System.out.println("Downloaded file " + real_name + " for " + ip);
+        		String extension = "";
+        		String real_name = sb.toString();
+        		process_queue.new_item(new QueueItem(guid + extension, real_name, ip));
+        		System.out.println("Downloaded file " + real_name + " for " + ip);
+        	} else {
+        		System.out.println("Could not download video " + URL + " queued by " + ip);
+        	}
 			process_queue.bucket_youtube.remove(temp);
 		} catch (Exception e) {
 			e.printStackTrace();

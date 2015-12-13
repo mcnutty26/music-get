@@ -53,7 +53,7 @@
       </div>
 
       <div class="login-form">
-        <form action="http://<?=$server_ip?>:8080/add" method="post" enctype="multipart/form-data">
+        <form action="http://<?=$server_ip?>:8080/add" method="post" onsubmit="return check()" enctype="multipart/form-data">
           <div class="row">
             <div class="col-xs-6">
               <div class="form-group">
@@ -159,6 +159,14 @@
                     data: {'guid': arg}})
                     location.replace('http://<?=$server_ip?>');
         }
+		function check(){
+		    var file = document.getElementById('file');
+		    if(file.value === null || file.value === ""){
+		        return false;
+            }
+            alert("!");
+		    return true;
+	    }
     </script>
 
     <script>
