@@ -85,6 +85,7 @@
         <?php
             $json = file_get_contents("http://localhost:8080/downloading");
             $data = json_decode($json, true);
+
             foreach ($data as $item) {
                 if ($client_ip == $item['ip']) {
                     echo "Downloading " . $item['name'] . "<br>";
@@ -103,25 +104,36 @@
         <?php
             $json = file_get_contents("http://localhost:8080/list");
             $data = json_decode($json, true);
+            $json_last = file_get_contents("http://localhost:8080/last");
+            $data_last = json_decode($json_last, true);
+            
             $queue = array();
             $queue_temp = array();
+            $last = array();
 
             foreach ($data as $item) {
                 array_push($queue, array($item['name'], $item['ip'], $item['guid']));
             }
+            foreach ($data_last as $item) {
+                array_push($last, $item['ip']);
+            }
 
+            $first_run = true;
             while (count($queue) > 0) {
                 $ips = array();
                 $bucket = array();
                 foreach ($queue as $item) {
-                    if (!in_array($item[1], $ips)) {
+                    if ($first_run == false and !in_array($item[1], $ips)) {
                         array_push($ips, $item[1]);
                         array_push($bucket, $item);
+                    } elseif ($first_run == true and !in_array($item[1], $last) and !in_array($item[1], $ips)) {
+                        array_push($bucket, $item);
+                        array_push($ips, $item[1]);
                     } else {
                         array_push($queue_temp, $item);
                     }
                 }
-
+                
                 foreach ($bucket as $item) {
                     echo "<tr>";
                     echo "<td>" . $item[0] . "</td>";
@@ -130,7 +142,14 @@
                     echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
                     echo "</tr>";
                 }
-                echo "<tr><td>&nbsp;</td><td></td><td></td></tr>";
+
+                if (empty($bucket) == false) {
+                    echo "<tr><td>&nbsp;</td><td></td><td></td></tr>";
+                }
+
+                if ($first_run == true) {
+                    $first_run = false;
+                }
 
                 unset($queue);
                 $queue = array();
