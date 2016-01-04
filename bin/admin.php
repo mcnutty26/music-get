@@ -1,5 +1,5 @@
 <?php
-    $server_ip = $_SERVER['SERVER_ADDR'];
+    $server_name = $_SERVER['SERVER_NAME'];
     $pw = trim(file_get_contents("config.ini"));
     session_start();
     if ($_POST['login'] == 2) {
@@ -162,16 +162,16 @@
     
     <script>
         function remove_item(arg) {
-            $.ajax({url: 'http://<?=$server_ip?>:8080/admin/remove',
+            $.ajax({url: 'http://<?=$server_name?>:8080/admin/remove',
                 method: 'POST',
                 data: {'guid': arg, 'pw' : '<?=$pw?>'}})
-                location.replace('http://<?=$server_ip?>/admin.php');
+                location.replace('http://<?=$server_name?>/admin.php');
         }
         function remove_current() {
-            $.ajax({url: 'http://<?=$server_ip?>:8080/admin/kill',
+            $.ajax({url: 'http://<?=$server_name?>:8080/admin/kill',
                 method: 'POST',
                 data: {'pw' : '<?=$pw?>'}})
-                location.replace('http://<?=$server_ip?>/admin.php');
+                location.replace('http://<?=$server_name?>/admin.php');
         }
     </script>
 

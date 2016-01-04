@@ -1,5 +1,5 @@
 <?php
-    $server_ip = $_SERVER['SERVER_ADDR'];
+    $server_name = $_SERVER['SERVER_NAME'];
     $client_ip = $_SERVER['REMOTE_ADDR'];
 ?>
 
@@ -53,7 +53,7 @@
       </div>
 
       <div class="login-form">
-        <form action="http://<?=$server_ip?>:8080/add" method="post" enctype="multipart/form-data">
+        <form action="http://<?=$server_name?>:8080/add" method="post" enctype="multipart/form-data">
           <div class="row">
             <div class="col-xs-6">
               <div class="form-group">
@@ -67,7 +67,7 @@
             </div>
           </div>
         </form>
-        <form action="http://<?=$server_ip?>:8080/url" method="post" enctype="multipart/form-data">
+        <form action="http://<?=$server_name?>:8080/url" method="post" enctype="multipart/form-data">
           <div class="row">
             <div class="col-xs-6">
               <div class="form-group">
@@ -173,10 +173,10 @@
     
     <script>
         function remove_item(arg) {
-                $.ajax({url: 'http://<?=$server_ip?>:8080/remove',
+                $.ajax({url: 'http://<?=$server_name?>:8080/remove',
                     method: 'POST',
                     data: {'guid': arg}})
-                    location.replace('http://<?=$server_ip?>');
+                    location.replace('http://<?=$server_name?>');
         }
     </script>
 
