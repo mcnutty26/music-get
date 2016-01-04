@@ -10,6 +10,7 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 * Create an apache virtualhost with the document root pointed at the music-get bin folder
 * Add ```Header set Access-Control-Allow-Origin "*"``` to the apache virtualhost
 * Run ```java -jar music-get.jar``` in bin
+* If youtube downloading doesn't work, run ```./youtube-dl -U``` to get the latest version of youtube-dl
 
 ##API:
 ##### /list returns a JSON array representing the current queue 
