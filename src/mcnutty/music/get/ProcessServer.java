@@ -184,9 +184,8 @@ public class ProcessServer extends AbstractHandler {
     
     //redirect the requester back to the front end
     void redirect(HttpServletRequest request, HttpServletResponse response) {
-    	String ip = request.getLocalName();
-    	System.out.println(request.getLocalName());
-    	String url = "http://" + ip + "/index.php";
+    	String name = "music";
+    	String url = "http://" + name + "/index.php";
     	response.setContentLength(0);
     	try {
 			response.sendRedirect(url);
