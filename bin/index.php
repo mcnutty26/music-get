@@ -161,9 +161,29 @@
             }
             ?>
           </table>
-        </div>
-      </div>
+	</div>
 
+	<?php if (file_get_contents("http://localhost:8080/alias") == "canalias") {?>
+	<div class="form-row">
+	    <h6>Set an alias for yourself (once per LAN)</h6>
+            <form action="http://<?=$server_name?>:8080/aliasadd" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="alias" placeholder="What would you like to be called?"/>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-primary btn-lg btn-block" value="Set alias">
+                        </div>
+                    </div>
+                </div>
+	    </form>
+	</div>
+	<?php } ?>
+
+      </div>
     </div> <!-- /container -->
 
     <script src="dist/js/vendor/jquery.min.js"></script>
