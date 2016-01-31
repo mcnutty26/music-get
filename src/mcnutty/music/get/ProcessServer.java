@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,10 +27,12 @@ public class ProcessServer extends AbstractHandler {
 	
 	ProcessQueue process_queue;
 	String directory;
+	HashMap<String, String> alias_map;
 	
 	public ProcessServer(ProcessQueue process_queue, String directory) {
 		this.process_queue = process_queue;
 		this.directory = directory;
+		this.alias_map = new HashMap<String, String>();
 	}
  
 	//all requests are routed through this method
@@ -52,10 +55,10 @@ public class ProcessServer extends AbstractHandler {
         //select which endpoint the user requested
         switch(target) {
         case "/list":
-        	list(out);
+        	list(request, out);
         	break;
         case "/last":
-        	last(out);
+        	last(request, out);
         	break;
         case "/current":
         	current(out);
@@ -69,7 +72,7 @@ public class ProcessServer extends AbstractHandler {
         	redirect(request, response);
         	break;
         case "/downloading":
-        	downloading(out);
+        	downloading(request, out);
         case "/remove":
         	remove(request);
         	break;
@@ -78,6 +81,13 @@ public class ProcessServer extends AbstractHandler {
         	break;
         case "/admin/remove":
         	admin_remove(request);
+        	break;
+        case "/alias/add":
+        	alias(request);
+        	redirect(request, response);
+        	break;
+        case "/alias":
+        	canalias(request, out);
         	break;
         default:
         	out.println("Welcome to the music-get backend!");
@@ -102,7 +112,7 @@ public class ProcessServer extends AbstractHandler {
     }
     
     //convert an ArrayList into a JSON array
-    JSONArray json_array_list(ArrayList<QueueItem> queue) {
+    JSONArray json_array_list(ArrayList<QueueItem> queue, HttpServletRequest request) {
     	JSONArray output = new JSONArray();
     	try {
 	    	for (QueueItem item : queue) {
@@ -110,6 +120,13 @@ public class ProcessServer extends AbstractHandler {
 	    		object.put("name", item.real_name);
 	    		object.put("guid", item.disk_name);
 	    		object.put("ip", item.ip);
+	    		
+	    		if (alias_map.containsKey(request.getRemoteAddr())){
+	    			object.put("alias", alias_map.get(request.getRemoteAddr()));
+	    		} else {
+	    			object.put("alias", "");
+	    		}
+	    		
 	    		output.put(object);
 	    	}
     	} catch (JSONException e) {
@@ -119,8 +136,8 @@ public class ProcessServer extends AbstractHandler {
     }
     
     //list the currently queued items
-    void list(PrintWriter out) {
-    	out.println(json_array_list(process_queue.bucket_queue));
+    void list(HttpServletRequest request, PrintWriter out) {
+    	out.println(json_array_list(process_queue.bucket_queue, request));
     }
     
     //list the name of the currently playing item 
@@ -133,8 +150,8 @@ public class ProcessServer extends AbstractHandler {
     }
     
     //list the items which have been played this bucket
-    void last(PrintWriter out) {
-    	out.println(json_array_list(process_queue.bucket_played));
+    void last(HttpServletRequest request, PrintWriter out) {
+    	out.println(json_array_list(process_queue.bucket_played, request));
     }
     
     //add an uploaded file to the queue 
@@ -164,8 +181,8 @@ public class ProcessServer extends AbstractHandler {
     }
     
     //list the currently downloading items
-    void downloading(PrintWriter out) {
-    	out.println(json_array_list(process_queue.bucket_youtube));
+    void downloading(HttpServletRequest request, PrintWriter out) {
+    	out.println(json_array_list(process_queue.bucket_youtube, request));
     }
     
     //remove an item from the queue
@@ -188,7 +205,7 @@ public class ProcessServer extends AbstractHandler {
     	String url = "http://" + name + "/index.php";
     	response.setContentLength(0);
     	try {
-			response.sendRedirect(url);
+    		response.sendRedirect(url);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -230,5 +247,34 @@ public class ProcessServer extends AbstractHandler {
     	}
     }
     
+    //add an alias for the requester if they don't already have one
+    void alias(HttpServletRequest request) {
+    	if (canalias(request) && !request.getParameter("alias").equals("")) {
+    		System.out.println(request.getRemoteAddr());
+    		System.out.println(request.getParameter("alias"));
+    		alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
+    		System.out.println("Added alias " + alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
+    	} else {
+    		System.out.println("Attempted double alias for " + request.getRemoteAddr());
+    	}
+    }
+  
+    //return true if the requester has an alias set
+    boolean canalias(HttpServletRequest request) {
+    	if (alias_map.containsKey(request.getRemoteAddr())) {
+    		return false;
+    	} else {
+    		return true;
+    	}
+    }
+    
+    //let the requester know if they have an alias set
+    void canalias(HttpServletRequest request, PrintWriter out) {
+    	if (alias_map.containsKey(request.getRemoteAddr())) {
+    		out.print("cannotalias");
+    	} else {
+    		out.print("canalias");
+    	}
+    }
 }
 

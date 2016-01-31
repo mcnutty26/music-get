@@ -112,7 +112,7 @@
             $last = array();
 
             foreach ($data as $item) {
-                array_push($queue, array($item['name'], $item['ip'], $item['guid']));
+                array_push($queue, array($item['name'], $item['ip'], $item['guid'], $item['alias']));
             }
             foreach ($data_last as $item) {
                 array_push($last, $item['ip']);
@@ -136,8 +136,8 @@
                 
                 foreach ($bucket as $item) {
                     echo "<tr>";
-                    echo "<td>" . $item[0] . "</td>";
-                    echo "<td>" . $item[1] . "</td>";
+                    echo "<td>" . substr($item[0], 0, 70) . "</td>";
+                    echo "<td>" . ($item[3] != "" ? substr($item[3], 0, 20) : $item[1]) . "</td>";
                     $guid = $item[2];
                     echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
                     echo "</tr>";
@@ -160,13 +160,14 @@
                 $queue_temp = array();
             }
             ?>
-          </table>
+	  </table>
+	</form>
 	</div>
 
 	<?php if (file_get_contents("http://localhost:8080/alias") == "canalias") {?>
 	<div class="form-row">
 	    <h6>Set an alias for yourself (once per LAN)</h6>
-            <form action="http://<?=$server_name?>:8080/aliasadd" method="post" enctype="multipart/form-data">
+	    <form action="http://<?=$server_name?>:8080/alias/add" method="post" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-xs-6">
                         <div class="form-group">
@@ -198,10 +199,6 @@
                     data: {'guid': arg}})
                     location.replace('http://<?=$server_name?>');
         }
-    </script>
-
-    <script>
-      videojs.options.flash.swf = "dist/js/vendors/video-js.swf"
     </script>
   </body>
 </html>
