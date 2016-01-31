@@ -45,4 +45,6 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 * PHP
 
 ##License:
-music-get is licensed under the GNU GPL v3
+* music-get is licensed under the GNU GPL v3
+* The included version of youtube-dl is public domain
+* The included version of jetty is licenced under the Apache Licence 2.0
