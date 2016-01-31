@@ -43,3 +43,6 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 * MPlayer
 * Apache
 * PHP
+
+##License:
+music-get is licensed under the GNU GPL v3
