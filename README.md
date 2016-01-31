@@ -36,15 +36,16 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 ##### /admin/remove accepts a guid (from /list) and a password via post and removes that guid from the queue
 ```curl music:8080/admin/remove -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c" -F "pw=letmein123"```
 ##Dependencies:
-* Jetty (included in music-get.jar)
-* JSON-java (included in music-get.jar)
-* youtube-dl (included in music-get.jar)
-* Java 8
-* MPlayer
-* Apache
-* PHP
+* [Jetty](https://github.com/eclipse/jetty.project) (included in music-get.jar)
+* [JSON-java](https://github.com/stleary/JSON-java) (included in music-get.jar)
+* [youtube-dl](https://github.com/rg3/youtube-dl/) (included in music-get.jar)
+* [Java 8](http://download.java.net/openjdk/jdk8/)
+* [MPlayer](https://www.mplayerhq.hu/design7/dload.html)
+* [Apache](https://github.com/apache/httpd)
+* [PHP](https://github.com/php/php-src)
 
 ##License:
 * music-get is licensed under the GNU GPL v3
-* The included version of youtube-dl is public domain
-* The included version of jetty is licenced under the Apache Licence 2.0
+* The included version of [youtube-dl](https://github.com/rg3/youtube-dl/) is public domain
+* The included version of [Jetty](https://github.com/eclipse/jetty.project) is licenced under the Apache Licence 2.0
+* The included version of [JSON-java](https://github.com/stleary/JSON-java) is licensed under a bespoke license
