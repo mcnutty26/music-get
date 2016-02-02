@@ -14,28 +14,38 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 
 ##API:
 ##### /list returns a JSON array representing the current queue 
-```curl 127.0.0.1:8080/list```
+```curl music:8080/list```
 ##### /last returns a JSON array representing the played items in the current bucket
-```curl 127.0.0.1:8080/last```
+```curl music:8080/last```
 ##### /current returns a string containing the name of the currently playing item
-```curl 127.0.0.1:8080/current```
+```curl music:8080/current```
 ##### /add accepts a file via post and adds it to the queue
-```curl -F "file=@/home/bob/path/to/file.mp3```
+```curl music:8080/add -F "file=@/home/bob/path/to/file.mp3"```
 ##### /url accepts a URL via post and attempts to download that file
-```curl -F "url=https://www.youtube.com/watch?v=QcIy9NiNbmo"```
+```curl music:8080/url -F "url=https://www.youtube.com/watch?v=QcIy9NiNbmo"```
 ##### /downloading returns a JSON array representing the currently downloading videos from /url
-```curl 127.0.0.1:8080/downloading```
+```curl music:8080/downloading```
+##### /alias returns 'canalias' or 'cannotalias' depending on whether the requester has an alias set
+````curl music:8080/alias```
+##### /alias/add adds an alias for the requester if they do not have one set
+````curl music:8080/alias/add -F "alias=myalias"```
 ##### /remove accepts a guid via post (from /list) and removes that guid from the queue if the requesting ip queued that item
-```curl -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c" 127.0.0.1:8080/remove```
+```curl music:8080/remove -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c"```
 ##### /admin/kill accepts a password via post and stops the currently playing item
-```curl -F "pw=letmein123" 127.0.0.1:8080/admin/kill```
+```curl music:8080/admin/kill -F "pw=letmein123"```
 ##### /admin/remove accepts a guid (from /list) and a password via post and removes that guid from the queue
-```curl -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c" -F "pw=letmein123" 127.0.0.1:8080/admin/remove```
+```curl music:8080/admin/remove -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c" -F "pw=letmein123"```
 ##Dependencies:
-* Jetty (included in music-get.jar)
-* JSON-java (included in music-get.jar)
-* youtube-dl (included in music-get.jar)
-* Java 8
-* MPlayer
-* Apache
-* PHP
+* [Jetty](https://github.com/eclipse/jetty.project) (included in music-get.jar)
+* [JSON-java](https://github.com/stleary/JSON-java) (included in music-get.jar)
+* [youtube-dl](https://github.com/rg3/youtube-dl/) (included in music-get.jar)
+* [Java 8](http://download.java.net/openjdk/jdk8/)
+* [MPlayer](https://www.mplayerhq.hu/design7/dload.html)
+* [Apache](https://github.com/apache/httpd)
+* [PHP](https://github.com/php/php-src)
+
+##License:
+* music-get is licensed under the GNU GPL v3
+* The included version of [youtube-dl](https://github.com/rg3/youtube-dl/) is public domain
+* The included version of [Jetty](https://github.com/eclipse/jetty.project) is licenced under the Apache Licence 2.0
+* The included version of [JSON-java](https://github.com/stleary/JSON-java) is licensed under a bespoke license
