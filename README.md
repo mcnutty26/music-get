@@ -35,7 +35,9 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 ```curl music:8080/admin/kill -F "pw=letmein123"```
 ##### /admin/remove accepts a guid (from /list) and a password via post and removes that guid from the queue
 ```curl music:8080/admin/remove -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c" -F "pw=letmein123"```
-##Dependencies:
+##### /admin/alias accepts an ip address, a password, and optionally an alias via post and sets (or resets) the alias for that ip
+```curl music:8080/admin/alias -F "ip=192.168.1.0" [-F "alias=newalias"] -F "pw=letmein123"```
+##Dependencies (with links to source code):
 * [Jetty](https://github.com/eclipse/jetty.project) (included in music-get.jar)
 * [JSON-java](https://github.com/stleary/JSON-java) (included in music-get.jar)
 * [youtube-dl](https://github.com/rg3/youtube-dl/) (included in music-get.jar)
