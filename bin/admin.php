@@ -1,3 +1,6 @@
+<!--This software is licensed under the GNU GPL v3 -->
+<!--Written by William Seymour-->
+
 <?php
     $server_name = $_SERVER['SERVER_NAME'];
     $pw = trim(file_get_contents("config.ini"));

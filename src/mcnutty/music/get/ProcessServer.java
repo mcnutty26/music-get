@@ -219,17 +219,13 @@ public class ProcessServer extends AbstractHandler {
     
     //admin: kill the currently playing item
     void kill(HttpServletRequest request) {
-    	BufferedReader br;
-    	String pw = "";
-		try {
-			br = new BufferedReader(new FileReader("config.ini"));
-			pw = br.readLine();
-			if (request.getParameter("pw").equals(pw)) {
-	    			Runtime.getRuntime().exec("killall mplayer");
-	    	}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    	if (config_auth(request.getParameter("pw"))) {
+	    	try {
+				Runtime.getRuntime().exec("killall mplayer");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    }
     }
     
     //admin: remove any item from the queue
@@ -240,15 +236,7 @@ public class ProcessServer extends AbstractHandler {
 				match = item;
 			}
     	}
-    	BufferedReader br;
-    	String pw = "";
-		try {
-			br = new BufferedReader(new FileReader("config.ini"));
-			pw = br.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    	if (match != null && request.getParameter("pw").equals(pw)) {
+    	if (config_auth(request.getParameter("pw"))) {
     		process_queue.delete_item(match);
     	}
     }
@@ -283,15 +271,7 @@ public class ProcessServer extends AbstractHandler {
     
     //admin: force unset or force change the alias of a user
     void admin_alias(HttpServletRequest request) {
-    	BufferedReader br;
-    	String pw = "";
-		try {
-			br = new BufferedReader(new FileReader("config.ini"));
-			pw = br.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    	if (request.getParameter("pw").equals(pw)) {
+    	if (config_auth(request.getParameter("pw"))) {
     		if (request.getParameter("alias").equals("")) {
     			alias_map.remove(request.getParameter("ip"));
     		} else {
@@ -299,6 +279,20 @@ public class ProcessServer extends AbstractHandler {
     		}
     	}
     }
-
     
+    boolean config_auth(String user_password){
+    	BufferedReader br;
+    	String config_password = "";
+		try {
+			br = new BufferedReader(new FileReader("config.ini"));
+			config_password = br.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (config_password.equals(user_password)) {
+			return true;
+		} else {
+			return false;
+		}
+    }
 }

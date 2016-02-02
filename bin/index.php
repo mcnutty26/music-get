@@ -1,3 +1,6 @@
+<!--This software is licensed under the GNU GPL v3 -->
+<!--Written by William Seymour-->
+
 <?php
     $server_name = $_SERVER['SERVER_NAME'];
     $client_ip = $_SERVER['REMOTE_ADDR'];
