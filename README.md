@@ -26,9 +26,9 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 ##### /downloading returns a JSON array representing the currently downloading videos from /url
 ```curl music:8080/downloading```
 ##### /alias returns 'canalias' or 'cannotalias' depending on whether the requester has an alias set
-````curl music:8080/alias```
+```curl music:8080/alias```
 ##### /alias/add adds an alias for the requester if they do not have one set
-````curl music:8080/alias/add -F "alias=myalias"```
+```curl music:8080/alias/add -F "alias=myalias"```
 ##### /remove accepts a guid via post (from /list) and removes that guid from the queue if the requesting ip queued that item
 ```curl music:8080/remove -F "guid=3c0a7a25-ffc5-4654-8e96-f8dc5dc70f5c"```
 ##### /admin/kill accepts a password via post and stops the currently playing item
