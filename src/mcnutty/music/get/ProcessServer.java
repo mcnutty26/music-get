@@ -1,3 +1,6 @@
+//This software is licensed under the GNU GPL v3
+//Written by William Seymour
+
 package mcnutty.music.get;
 
 import java.io.BufferedReader;
@@ -65,16 +68,23 @@ public class ProcessServer extends AbstractHandler {
         	break;
         case "/add":
         	add(request);
-        	redirect(request, response);
+        	redirect(request, response, "index");
         	break;
         case "/url":
         	url(request);
-        	redirect(request, response);
+        	redirect(request, response, "index");
         	break;
         case "/downloading":
         	downloading(request, out);
         case "/remove":
         	remove(request);
+        	break;
+        case "/alias/add":
+        	alias(request);
+        	redirect(request, response, "index");
+        	break;
+        case "/alias":
+        	canalias(request, out);
         	break;
         case "/admin/kill":
         	kill(request);
@@ -82,13 +92,9 @@ public class ProcessServer extends AbstractHandler {
         case "/admin/remove":
         	admin_remove(request);
         	break;
-        case "/alias/add":
-        	alias(request);
-        	redirect(request, response);
-        	break;
-        case "/alias":
-        	canalias(request, out);
-        	break;
+        case "/admin/alias":
+        	admin_alias(request);
+        	redirect(request, response, "admin");
         default:
         	out.println("Welcome to the music-get backend!");
         }
@@ -200,9 +206,9 @@ public class ProcessServer extends AbstractHandler {
     }
     
     //redirect the requester back to the front end
-    void redirect(HttpServletRequest request, HttpServletResponse response) {
+    void redirect(HttpServletRequest request, HttpServletResponse response, String page) {
     	String name = "music";
-    	String url = "http://" + name + "/index.php";
+    	String url = "http://" + name + "/" + page + ".php";
     	response.setContentLength(0);
     	try {
     		response.sendRedirect(url);
@@ -250,8 +256,6 @@ public class ProcessServer extends AbstractHandler {
     //add an alias for the requester if they don't already have one
     void alias(HttpServletRequest request) {
     	if (canalias(request) && !request.getParameter("alias").equals("")) {
-    		System.out.println(request.getRemoteAddr());
-    		System.out.println(request.getParameter("alias"));
     		alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
     		System.out.println("Added alias " + alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
     	} else {
@@ -276,5 +280,25 @@ public class ProcessServer extends AbstractHandler {
     		out.print("canalias");
     	}
     }
-}
+    
+    //admin: force unset or force change the alias of a user
+    void admin_alias(HttpServletRequest request) {
+    	BufferedReader br;
+    	String pw = "";
+		try {
+			br = new BufferedReader(new FileReader("config.ini"));
+			pw = br.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	if (request.getParameter("pw").equals(pw)) {
+    		if (request.getParameter("alias").equals("")) {
+    			alias_map.remove(request.getParameter("ip"));
+    		} else {
+    			alias_map.replace(request.getParameter("ip"), request.getParameter("alias"));
+    		}
+    	}
+    }
 
+    
+}

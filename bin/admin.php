@@ -81,7 +81,7 @@
             $last = array();
             
             foreach ($data as $item) {
-                array_push($queue, array($item['name'], $item['ip'], $item['guid']));
+                array_push($queue, array($item['name'], $item['ip'], $item['guid'], $item['alias']));
             }
             foreach ($data_last as $item) {
                 array_push($last, $item['ip']);
@@ -105,8 +105,8 @@
                 
                 foreach ($bucket as $item) {
                     echo "<tr>";
-                    echo "<td>" . $item[0] . "</td>";
-                    echo "<td>" . $item[1] . "</td>";
+                    echo "<td>" . substr($item[0], 0, 70) . "</td>";
+                    echo "<td>" . $item[1] . ($item[3] != "" ? "/" . substr($item[3], 0, 20) : "") . "</td>";
                     $guid = $item[2];
                     echo "<td><a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a></td>";
                     echo "</tr>";
@@ -131,8 +131,33 @@
              ?>
           </table>
           </div>
-		</div>
-        <div class="row">
+	</div>
+	
+	<div class="form-row">
+	    <h6>Change the alias of a user</h6>
+	    <form action="http://<?=$server_name?>:8080/admin/alias" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="pw" value="<?=$_SESSION['login']?>" />
+                <div class="row">
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="ip" placeholder="IP Address"/>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="alias" placeholder="New alias (leave blank to reset)"/>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-primary btn-lg btn-block" value="Set alias">
+                        </div>
+                    </div>
+                </div>
+	    </form>
+	</div>
+	
+	<div class="row">
           <div class="col-xs-6">
             <input type="submit" class="btn btn-danger btn-lg btn-block" onclick="remove_current()" value="Kill current item">
           </div>
@@ -142,7 +167,7 @@
               <input type="submit" class="btn btn-primary btn-lg btn-block" value="Log out">
             </form>
           </div>
-		</div>
+	</div>
         <?php } else { ?>
         <form method="post" action="admin.php">
           <div class="form-group">
@@ -173,10 +198,6 @@
                 data: {'pw' : '<?=$pw?>'}})
                 location.replace('http://<?=$server_name?>/admin.php');
         }
-    </script>
-
-    <script>
-      videojs.options.flash.swf = "dist/js/vendors/video-js.swf"
     </script>
   </body>
 </html>
