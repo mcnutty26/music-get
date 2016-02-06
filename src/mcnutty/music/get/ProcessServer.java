@@ -127,8 +127,8 @@ public class ProcessServer extends AbstractHandler {
 	    		object.put("guid", item.disk_name);
 	    		object.put("ip", item.ip);
 	    		
-	    		if (alias_map.containsKey(request.getRemoteAddr())){
-	    			object.put("alias", alias_map.get(request.getRemoteAddr()));
+	    		if (alias_map.containsKey(item.ip)){
+	    			object.put("alias", alias_map.get(item.ip));
 	    		} else {
 	    			object.put("alias", "");
 	    		}
@@ -207,7 +207,7 @@ public class ProcessServer extends AbstractHandler {
     
     //redirect the requester back to the front end
     void redirect(HttpServletRequest request, HttpServletResponse response, String page) {
-    	String name = "music.lan";
+    	String name = request.getLocalAddr();
     	String url = "http://" + name + "/" + page + ".php";
     	response.setContentLength(0);
     	try {
@@ -253,7 +253,7 @@ public class ProcessServer extends AbstractHandler {
   
     //return true if the requester has an alias set
     boolean canalias(HttpServletRequest request) {
-    	if (alias_map.containsKey(request.getRemoteAddr())) {
+    	if (alias_map.containsKey(request.getParameter("ip"))) {
     		return false;
     	} else {
     		return true;
@@ -262,7 +262,7 @@ public class ProcessServer extends AbstractHandler {
     
     //let the requester know if they have an alias set
     void canalias(HttpServletRequest request, PrintWriter out) {
-    	if (alias_map.containsKey(request.getRemoteAddr())) {
+    	if (alias_map.containsKey(request.getParameter("ip"))) {
     		out.print("cannotalias");
     	} else {
     		out.print("canalias");
