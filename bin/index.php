@@ -96,7 +96,7 @@
             }
         ?>
         
-        <h6>Currently playing <?=file_get_contents("http://localhost:8080/current");?></h6>
+	<h6>Currently playing <?=substr(file_get_contents("http://localhost:8080/current"), 0, 60);?></h6>
         
         <table>
             <tr>
@@ -139,7 +139,7 @@
                 
                 foreach ($bucket as $item) {
                     echo "<tr>";
-                    echo "<td>" . substr($item[0], 0, 70) . "</td>";
+                    echo "<td>" . substr($item[0], 0, 60) . "</td>";
 		    echo "<td>" . ($item[3] != "" ? substr($item[3], 0, 20) : $item[1]) . "</td>";
                     $guid = $item[2];
                     echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";

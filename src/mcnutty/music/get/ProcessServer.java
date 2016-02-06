@@ -149,7 +149,12 @@ public class ProcessServer extends AbstractHandler {
     //list the name of the currently playing item 
     void current(PrintWriter out) {
     	try {
-    		out.println(process_queue.bucket_played.get(process_queue.bucket_played.size() - 1).real_name);
+    		QueueItem item = process_queue.bucket_played.get(process_queue.bucket_played.size() - 1);
+    		String display_name  = item.ip;
+    		if (alias_map.containsKey(item.ip)){
+    			display_name = alias_map.get(item.ip);
+    		}
+    		out.println(item.real_name + " by " + display_name);
     	} catch (Exception e) {
     		out.println("nothing!");
     	}
