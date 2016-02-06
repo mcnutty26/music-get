@@ -227,6 +227,7 @@ public class ProcessServer extends AbstractHandler {
     	if (config_auth(request.getParameter("pw"))) {
 	    	try {
 				Runtime.getRuntime().exec("killall mplayer");
+				System.out.println("Current item killed");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -243,6 +244,7 @@ public class ProcessServer extends AbstractHandler {
     	}
     	if (config_auth(request.getParameter("pw"))) {
     		process_queue.delete_item(match);
+    		System.out.println("Item " + match.real_name + " removed from queue by admin");
     	}
     }
     
@@ -279,8 +281,10 @@ public class ProcessServer extends AbstractHandler {
     	if (config_auth(request.getParameter("pw"))) {
     		if (request.getParameter("alias").equals("")) {
     			alias_map.remove(request.getParameter("ip"));
+    			System.out.println("Alias reset for " + request.getParameter("ip"));
     		} else {
     			alias_map.replace(request.getParameter("ip"), request.getParameter("alias"));
+    			System.out.println("Alias changed for " + request.getParameter("ip"));
     		}
     	}
     }

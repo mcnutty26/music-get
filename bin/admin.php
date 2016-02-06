@@ -108,7 +108,7 @@
                 
                 foreach ($bucket as $item) {
                     echo "<tr>";
-                    echo "<td>" . substr($item[0], 0, 70) . "</td>";
+                    echo "<td>" . substr($item[0], 0, 60) . "</td>";
                     echo "<td>" . $item[1] . ($item[3] != "" ? "/" . substr($item[3], 0, 20) : "") . "</td>";
                     $guid = $item[2];
                     echo "<td><a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a></td>";
@@ -161,8 +161,11 @@
 	</div>
 	
 	<div class="row">
-          <div class="col-xs-6">
-            <input type="submit" class="btn btn-danger btn-lg btn-block" onclick="remove_current()" value="Kill current item">
+	  <div class="col-xs-6">
+            <form method="post" action="admin.php">
+              <input type="hidden" name="pw" value="<?=$_SESSION['login']?>" />
+              <input type="submit" class="btn btn-danger btn-lg btn-block" onclick="remove_current()" value="Kill current item">
+            </form>
           </div>
           <div class="col-xs-6">
 		    <form method="post" action="admin.php">
