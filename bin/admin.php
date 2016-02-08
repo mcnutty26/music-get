@@ -111,7 +111,7 @@
                     echo "<td>" . htmlspecialchars(substr($item[0], 0, 60)) . "</td>";
                     echo "<td>" . $item[1] . htmlspecialchars($item[3] != "" ? "/" . substr($item[3], 0, 20) : "") . "</td>";
                     $guid = $item[2];
-                    echo "<td><a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a></td>";
+                    echo "<td><a class=\"fui-cross clickable\" onclick=\"remove_item('$guid')\"></a></td>";
                     echo "</tr>";
                 }
                 

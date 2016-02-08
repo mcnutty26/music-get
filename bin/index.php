@@ -141,7 +141,7 @@
                     echo "<td>" . htmlspecialchars(substr($item[0], 0, 60)) . "</td>";
 		    echo "<td>" . htmlspecialchars(($item[3] != "" ? substr($item[3], 0, 20) : $item[1])) . "</td>";
                     $guid = $item[2];
-                    echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross ajax-button\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
+                    echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross clickable\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
                     echo "</tr>";
                 }
 
