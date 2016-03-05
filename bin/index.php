@@ -133,7 +133,6 @@
 		function remove_item(arg) {
 			$.ajax({url: 'http://<?=$server_name?>:8080/remove',
 				method: 'POST', data: {'guid': arg}})
-			location.replace('http://<?=$server_name?>');
 		}
 		function init(){
 			document.cookie = "music-get-client=<?=$client_ip?>";
