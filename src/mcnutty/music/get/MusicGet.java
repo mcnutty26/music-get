@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.TimeUnit;
 
 public class MusicGet {
 	
@@ -57,11 +58,11 @@ public class MusicGet {
 	    	if (!next_item.equals(new QueueItem())) {
 	    		System.out.println("Playing " + next_item.real_name);
 		    	process_queue.set_played(next_item);
-		    	Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
+		    	Process p = Runtime.getRuntime().exec("mplayer -fs -quiet -af volnorm=2:0.25 "
 		    			+ System.getProperty("java.io.tmpdir") + directory + next_item.disk_name);
 
 		    	try {
-		    		p.waitFor();
+		    		p.waitFor(timeout, TimeUnit.SECONDS);
 		    		Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
 		    	} catch (Exception ex) {
 		    	}
