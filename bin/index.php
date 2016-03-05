@@ -97,7 +97,7 @@
 					?>
 					<h6 id="current"><?=htmlspecialchars(substr(file_get_contents("http://localhost:8080/current"), 0, 60))?></h6>
 					<div id="playing">
-						<?=file_get_contents("http://localhost/playing.php")?>
+						<?=file_get_contents("http://music.lan/playing.php")?>
 					</div>
 				</div>
 
