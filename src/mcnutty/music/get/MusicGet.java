@@ -58,7 +58,7 @@ public class MusicGet {
 	    		System.out.println("Playing " + next_item.real_name);
 		    	process_queue.set_played(next_item);
 		    	Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
-		    			+ System.getProperty("java.io.tmpdir") + directory + "/" + next_item.disk_name);
+		    			+ System.getProperty("java.io.tmpdir") + directory + next_item.disk_name);
 
 		    	try {
 		    		p.waitFor();
