@@ -139,6 +139,7 @@
                 location.replace('http://<?=$server_name?>');
 	}
 	function init(){
+		document.cookie = "music-get-client=<?=$client_ip?>";
             window.setInterval(function(){
     	        $.ajax({url: 'http://<?=$server_name?>:8080/current',
 		    method: 'POST'})

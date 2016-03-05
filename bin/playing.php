@@ -1,3 +1,7 @@
+<?php
+	$client_ip = $_COOKIE['music-get-client']; 
+?>
+
 <table>
             <tr>
               <td></td>
