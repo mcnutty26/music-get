@@ -159,10 +159,7 @@
 
 					<div class="row">
 						<div class="col-xs-6">
-							<form method="post" action="admin.php">
-								<input type="hidden" name="pw" value="<?=$_SESSION['login']?>" />
-								<input type="submit" class="btn btn-danger btn-lg btn-block" onclick="remove_current()" value="Kill current item">
-							</form>
+							<a class="btn btn-danger btn-lg btn-block" onclick="remove_current()" href="#">Kill current item</a>
 						</div>
 						<div class="col-xs-6">
 							<form method="post" action="admin.php">
