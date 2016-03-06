@@ -7,10 +7,8 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 
 ##Setup
 * create config.ini in bin, and have it contain the admin password
-* Create an apache virtualhost with the document root pointed at the music-get bin folder
-* Add ```Header set Access-Control-Allow-Origin "*"``` to the apache virtualhost
-* Run ```java -jar music-get.jar``` in bin
-* If youtube downloading doesn't work, run ```./youtube-dl -U``` to get the latest version of youtube-dl
+* Create an apache virtualhost with the document root pointed at the music-get bin folder (a sample config is provided in conf)
+* Run ```./run.sh``` (this will update youtube-dl and start the server back end)
 
 ##API:
 ##### /list returns a JSON array representing the current queue 
@@ -41,7 +39,7 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 * [Flat-UI](https://github.com/designmodo/Flat-UI) (included in the bin directory)
 * [Jetty](https://github.com/eclipse/jetty.project) (included in music-get.jar)
 * [JSON-java](https://github.com/stleary/JSON-java) (included in music-get.jar)
-* [youtube-dl](https://github.com/rg3/youtube-dl/) (included in music-get.jar)
+* [youtube-dl](https://github.com/rg3/youtube-dl/) (included in the bin directory)
 * [Java 8](http://download.java.net/openjdk/jdk8/)
 * [MPlayer](https://www.mplayerhq.hu/design7/dload.html)
 * [Apache](https://github.com/apache/httpd)
