@@ -16,8 +16,8 @@ public class MusicGet {
 	
 	public static void main( String[] args ) throws Exception
 	{    
-		int timeout = 547; //timeout in seconds
-		String directory = "/musicserver/"; //place in tmp where files will be stored
+		final int timeout = 547; //timeout in seconds
+		final String directory = "/musicserver/"; //place in tmp where files will be stored
 		
 		//print out music-get
 		System.out.println("                     _                      _   ");
@@ -58,7 +58,7 @@ public class MusicGet {
 	    	if (!next_item.equals(new QueueItem())) {
 	    		System.out.println("Playing " + next_item.real_name);
 		    	process_queue.set_played(next_item);
-		    	Process p = Runtime.getRuntime().exec("mplayer -fs -quiet -af volnorm=2:0.25 "
+		    	Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
 		    			+ System.getProperty("java.io.tmpdir") + directory + next_item.disk_name);
 
 		    	try {
