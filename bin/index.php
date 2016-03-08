@@ -85,16 +85,8 @@
 				</form>
 
 				<div class="form-group">
-					<?php
-						$json = file_get_contents("http://localhost:8080/downloading");
-						$data = json_decode($json, true);
-
-						foreach ($data as $item) {
-							if ($client_ip == $item['ip']) {
-								echo "Downloading " . $item['name'] . "<br>";
-							}
-						}
-					?>
+					<div id="downloading">
+					</div>
 					<h6 id="current"><?=htmlspecialchars(substr(file_get_contents("http://localhost:8080/current"), 0, 60))?></h6>
 					<div id="playing">
 						<?=file_get_contents("http://music.lan/playing.php")?>
@@ -140,6 +132,8 @@
 					.done(function(data){document.getElementById("current").innerHTML = data;});
 				$.ajax({url: 'http://<?=$server_name?>/playing.php', method: 'POST'})
 					.done(function(data){document.getElementById("playing").innerHTML = data;});
+				$.ajax({url: 'http://<?=$server_name?>/downloading.php', method: 'POST'})
+					.done(function(data){document.getElementById("downloading").innerHTML = data ;});
 			}, 1000);
 		}
 		</script>
