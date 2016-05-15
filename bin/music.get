@@ -1,0 +1,8 @@
+#!/bin/env bash
+
+echo "Updating music-get..."
+git pull
+echo "Updating youtube-dl..."
+./youtube-dl --update
+echo "Starting music-get..."
+java -Xmx5000m -jar music-get.jar 
