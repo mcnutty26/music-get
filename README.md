@@ -8,7 +8,7 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 ##Setup
 * create config.ini in bin, and have it contain the admin password
 * Create an apache virtualhost with the document root pointed at the music-get bin folder (a sample config is provided in conf)
-* Run ```./run.sh``` (this will update youtube-dl and start the server back end)
+* Run ```./music.get``` (this will pull any repo updates, upgrade youtube-dl, and start the server back end)
 
 ##API:
 ##### /list returns a JSON array representing the current queue 
