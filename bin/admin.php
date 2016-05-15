@@ -168,6 +168,21 @@
 							</form>
 						</div>
 					</div>
+
+					<script>
+						function remove_item(arg) {
+							$.ajax({url: 'http://<?=$server_name?>:8080/admin/remove',
+								method: 'POST',
+								data: {'guid': arg, 'pw' : '<?=$pw?>'}})
+								location.replace('http://<?=$server_name?>/admin.php');
+						}
+						function remove_current() {
+							$.ajax({url: 'http://<?=$server_name?>:8080/admin/kill',
+								method: 'POST',
+								data: {'pw' : '<?=$pw?>'}})
+								location.replace('http://<?=$server_name?>/admin.php');
+						}
+					</script>
 				<?php } else { ?>
 				<form method="post" action="admin.php">
 					<div class="form-group">
@@ -184,20 +199,5 @@
 		<script src="dist/js/vendor/video.js"></script>
 		<script src="dist/js/flat-ui.min.js"></script>
 		<script src="docs/assets/js/application.js"></script>
-
-		<script>
-			function remove_item(arg) {
-				$.ajax({url: 'http://<?=$server_name?>:8080/admin/remove',
-					method: 'POST',
-					data: {'guid': arg, 'pw' : '<?=$pw?>'}})
-					location.replace('http://<?=$server_name?>/admin.php');
-			}
-			function remove_current() {
-				$.ajax({url: 'http://<?=$server_name?>:8080/admin/kill',
-					method: 'POST',
-					data: {'pw' : '<?=$pw?>'}})
-					location.replace('http://<?=$server_name?>/admin.php');
-			}
-		</script>
   	</body>
 </html>
