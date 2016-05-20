@@ -36,7 +36,7 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 ##### /admin/alias accepts an ip address, a password, and optionally an alias via post and sets (or resets) the alias for that ip
 ```curl music:8080/admin/alias -F "ip=192.168.1.0" [-F "alias=newalias"] -F "pw=letmein123"```
 ##Dependencies (with links to source code):
-* [Flat-UI](https://github.com/designmodo/Flat-UI) (included in the bin directory)
+* [Flat-UI](https://github.com/designmodo/Flat-UI) (included in the `dist` directory)
 * [Jetty](https://github.com/eclipse/jetty.project) 
 * [JSON-java](https://github.com/stleary/JSON-java) 
 * [youtube-dl](https://github.com/rg3/youtube-dl/) (included in the `dist` directory)
