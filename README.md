@@ -6,9 +6,9 @@ One of the (many) music server implementations for UWCS. While the other options
 See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information on how music-get works.
 
 ##Setup
-* create config.ini in bin, and have it contain the admin password
-* Create an apache virtualhost with the document root pointed at the music-get bin folder (a sample config is provided in conf)
-* Run ```./music.get``` (this will pull any repo updates, upgrade youtube-dl, and start the server back end)
+* create `config.ini` in `dist`, and have it contain the admin password
+* Create an apache virtualhost with the document root pointed at the music-get `dist` folder (a sample config is provided in `dist/apache`)
+* Run `music.get` (this will pull any repo updates, build the project, upgrade youtube-dl, and start the server back end)
 
 ##API:
 ##### /list returns a JSON array representing the current queue 
@@ -37,17 +37,17 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
 ```curl music:8080/admin/alias -F "ip=192.168.1.0" [-F "alias=newalias"] -F "pw=letmein123"```
 ##Dependencies (with links to source code):
 * [Flat-UI](https://github.com/designmodo/Flat-UI) (included in the bin directory)
-* [Jetty](https://github.com/eclipse/jetty.project) (included in music-get.jar)
-* [JSON-java](https://github.com/stleary/JSON-java) (included in music-get.jar)
-* [youtube-dl](https://github.com/rg3/youtube-dl/) (included in the bin directory)
+* [Jetty](https://github.com/eclipse/jetty.project) 
+* [JSON-java](https://github.com/stleary/JSON-java) 
+* [youtube-dl](https://github.com/rg3/youtube-dl/) (included in the `dist` directory)
 * [Java 8](http://download.java.net/openjdk/jdk8/)
 * [MPlayer](https://www.mplayerhq.hu/design7/dload.html)
 * [Apache](https://github.com/apache/httpd)
 * [PHP](https://github.com/php/php-src)
 
-##License:
+##Licenses:
 * music-get is licensed under the GNU GPL v3
-* The included version of [Flat-UI](https://github.com/designmodo/Flat-UI) is licensed under the Creative Commons Attribution 3.0 Unported license (CC BY 3.0) 
-* The included version of [youtube-dl](https://github.com/rg3/youtube-dl/) is public domain
-* The included version of [Jetty](https://github.com/eclipse/jetty.project) is licenced under the Apache Licence 2.0
-* The included version of [JSON-java](https://github.com/stleary/JSON-java) is licensed under a bespoke license
+* [Flat-UI](https://github.com/designmodo/Flat-UI) is licensed under the Creative Commons Attribution 3.0 Unported license (CC BY 3.0)
+* [youtube-dl](https://github.com/rg3/youtube-dl/) is public domain
+* [Jetty](https://github.com/eclipse/jetty.project) is licenced under the Apache Licence 2.0
+* [JSON-java](https://github.com/stleary/JSON-java) is licensed under a bespoke license
