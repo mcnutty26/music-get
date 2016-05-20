@@ -1,8 +1,11 @@
-#!/bin/env bash
+#!/bin/sh
 
 echo "Updating music-get..."
 git pull
+echo "Building music-get..."
+./gradlew update
+cd dist/
 echo "Updating youtube-dl..."
 ./youtube-dl --update
 echo "Starting music-get..."
-java -Xmx5000m -jar music-get.jar 
+java -Xmx5000m -jar music-get.jar

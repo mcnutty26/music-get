@@ -74,3 +74,4 @@ gradle-app.setting
 
 # Config stuff
 dist/config.ini
+dist/music-get.jar

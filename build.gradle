@@ -1,8 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'idea'
 
-version = '1.0'
-
 repositories {
     mavenCentral()
 }
@@ -14,6 +12,17 @@ jar {
 
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task update(dependsOn: ['clean', 'assemble', 'jar']) {
+    assemble.mustRunAfter 'clean'
+
+    doLast {
+        copy {
+            from 'build/libs/music-get.jar'
+            into 'dist/'
+        }
     }
 }
 
