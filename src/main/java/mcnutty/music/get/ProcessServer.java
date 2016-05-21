@@ -3,6 +3,17 @@
 
 package mcnutty.music.get;
 
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,29 +24,16 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
+class ProcessServer extends AbstractHandler {
 
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+    private ProcessQueue processQueue;
+    private String directory;
+    private HashMap<String, String> aliasMap;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-public class ProcessServer extends AbstractHandler {
-
-    ProcessQueue process_queue;
-    String directory;
-    HashMap<String, String> alias_map;
-
-    public ProcessServer(ProcessQueue process_queue, String directory) {
-        this.process_queue = process_queue;
+    ProcessServer(ProcessQueue processQueue, String directory) {
+        this.processQueue = processQueue;
         this.directory = directory;
-        this.alias_map = new HashMap<String, String>();
+        this.aliasMap = new HashMap<>();
     }
 
     //all requests are routed through this method
@@ -57,43 +55,43 @@ public class ProcessServer extends AbstractHandler {
         //select which endpoint the user requested
         switch (target) {
             case "/list":
-                list(request, out);
+                list(out);
                 break;
             case "/last":
-                last(request, out);
+                last(out);
                 break;
             case "/current":
                 current(out);
                 break;
             case "/add":
                 add(request);
-                redirect(request, response, "index");
+                redirect(response, "index");
                 break;
             case "/url":
                 url(request);
-                redirect(request, response, "index");
+                redirect(response, "index");
                 break;
             case "/downloading":
-                downloading(request, out);
+                downloading(out);
             case "/remove":
                 remove(request);
                 break;
             case "/alias/add":
                 alias(request);
-                redirect(request, response, "index");
+                redirect(response, "index");
                 break;
             case "/alias":
-                canalias(request, out);
+                isAliased(request, out);
                 break;
             case "/admin/kill":
                 kill(request);
                 break;
             case "/admin/remove":
-                admin_remove(request);
+                adminRemove(request);
                 break;
             case "/admin/alias":
-                admin_alias(request);
-                redirect(request, response, "admin");
+                adminAlias(request);
+                redirect(response, "admin");
             default:
                 out.println("Welcome to the music-get backend!");
         }
@@ -117,17 +115,17 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //convert an ArrayList into a JSON array
-    JSONArray json_array_list(ArrayList<QueueItem> queue, HttpServletRequest request) {
+    private JSONArray jsonArrayList(ArrayList<QueueItem> queue) {
         JSONArray output = new JSONArray();
         try {
             for (QueueItem item : queue) {
                 JSONObject object = new JSONObject();
-                object.put("name", item.real_name);
-                object.put("guid", item.disk_name);
-                object.put("ip", item.ip);
+                object.put("name", item.getRealName());
+                object.put("guid", item.getDiskName());
+                object.put("ip", item.getIp());
 
-                if (alias_map.containsKey(item.ip)) {
-                    object.put("alias", alias_map.get(item.ip));
+                if (aliasMap.containsKey(item.getIp())) {
+                    object.put("alias", aliasMap.get(item.getIp()));
                 } else {
                     object.put("alias", "");
                 }
@@ -141,41 +139,40 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //list the currently queued items
-    void list(HttpServletRequest request, PrintWriter out) {
-        out.println(json_array_list(process_queue.bucket_queue, request));
+    private void list(PrintWriter out) {
+        out.println(jsonArrayList(processQueue.getBucketQueue()));
     }
 
     //list the name of the currently playing item 
-    void current(PrintWriter out) {
+    private void current(PrintWriter out) {
         try {
-            QueueItem item = process_queue.bucket_played.get(process_queue.bucket_played.size() - 1);
-            String display_name = item.ip;
-            if (alias_map.containsKey(item.ip)) {
-                display_name = alias_map.get(item.ip);
+            QueueItem item = processQueue.getBucketPlayed().get(processQueue.getBucketPlayed().size() - 1);
+            String display_name = item.getIp();
+            if (aliasMap.containsKey(item.getIp())) {
+                display_name = aliasMap.get(item.getIp());
             }
-            out.println(item.real_name + " by " + display_name);
+            out.println(item.getRealName() + " by " + display_name);
         } catch (Exception e) {
             out.println("nothing!");
         }
     }
 
     //list the items which have been played this bucket
-    void last(HttpServletRequest request, PrintWriter out) {
-        out.println(json_array_list(process_queue.bucket_played, request));
+    private void last(PrintWriter out) {
+        out.println(jsonArrayList(processQueue.getBucketPlayed()));
     }
 
     //add an uploaded file to the queue 
-    void add(HttpServletRequest request) {
+    private void add(HttpServletRequest request) {
         String guid = UUID.randomUUID().toString();
         Part uploaded_file;
         try {
             uploaded_file = request.getPart("file");
-            ;
             uploaded_file.write(directory + guid);
             QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
-            if (!new_item.real_name.equals("")) {
-                process_queue.new_item(new_item);
-                System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
+            if (!new_item.getRealName().equals("")) {
+                processQueue.newItem(new_item);
+                System.out.println("Added file " + new_item.getRealName() + " from " + new_item.getIp());
             }
         } catch (IOException | ServletException e) {
             e.printStackTrace();
@@ -183,35 +180,35 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //download a video at the supplied URL
-    void url(HttpServletRequest request) {
+    private void url(HttpServletRequest request) {
         if (!request.getParameter("url").equals("")) {
-            YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
+            YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), processQueue, request.getRemoteAddr(), directory);
             ExecutorService executor = Executors.newCachedThreadPool();
             executor.submit(download);
         }
     }
 
     //list the currently downloading items
-    void downloading(HttpServletRequest request, PrintWriter out) {
-        out.println(json_array_list(process_queue.bucket_youtube, request));
+    private void downloading(PrintWriter out) {
+        out.println(jsonArrayList(processQueue.getBucketYoutube()));
     }
 
     //remove an item from the queue
-    void remove(HttpServletRequest request) {
+    private void remove(HttpServletRequest request) {
         QueueItem match = null;
-        for (QueueItem item : process_queue.bucket_queue) {
-            if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getRemoteAddr().toString())) {
+        for (QueueItem item : processQueue.getBucketQueue()) {
+            if (item.getDiskName().equals(request.getParameter("guid")) && item.getIp().equals(request.getRemoteAddr())) {
                 match = item;
             }
         }
         if (match != null) {
-            process_queue.delete_item(match);
-            System.out.println(match.ip + " deleted item " + match.real_name);
+            processQueue.deleteItem(match);
+            System.out.println(match.getIp() + " deleted item " + match.getRealName());
         }
     }
 
     //redirect the requester back to the front end
-    void redirect(HttpServletRequest request, HttpServletResponse response, String page) {
+    private void redirect(HttpServletResponse response, String page) {
         String name = "music.lan"; //request.getLocalAddr();
         String url = "http://" + name + "/" + page + ".php";
         response.setContentLength(0);
@@ -223,8 +220,8 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //admin: kill the currently playing item
-    void kill(HttpServletRequest request) {
-        if (config_auth(request.getParameter("pw"))) {
+    private void kill(HttpServletRequest request) {
+        if (configAuth(request.getParameter("pw"))) {
             try {
                 Runtime.getRuntime().exec("killall mplayer");
                 System.out.println("Current item killed");
@@ -235,73 +232,67 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //admin: remove any item from the queue
-    void admin_remove(HttpServletRequest request) {
+    private void adminRemove(HttpServletRequest request) {
         QueueItem match = null;
-        for (QueueItem item : process_queue.bucket_queue) {
-            if (item.disk_name.equals(request.getParameter("guid"))) {
+        for (QueueItem item : processQueue.getBucketQueue()) {
+            if (item.getDiskName().equals(request.getParameter("guid"))) {
                 match = item;
             }
         }
-        if (config_auth(request.getParameter("pw"))) {
-            process_queue.delete_item(match);
-            System.out.println("Item " + match.real_name + " removed from queue by admin");
+        if (configAuth(request.getParameter("pw")) && match != null) {
+            processQueue.deleteItem(match);
+            System.out.println("Item " + match.getRealName() + " removed from queue by admin");
         }
     }
 
     //add an alias for the requester if they don't already have one
-    void alias(HttpServletRequest request) {
-        if (canalias(request) && !request.getParameter("alias").equals("")) {
-            alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
-            System.out.println("Added alias " + alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
+    private void alias(HttpServletRequest request) {
+        if (isAliased(request) && !request.getParameter("alias").equals("")) {
+            aliasMap.put(request.getRemoteAddr(), request.getParameter("alias"));
+            System.out.println("Added alias " + aliasMap.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
         } else {
             System.out.println("Attempted double alias for " + request.getRemoteAddr());
         }
     }
 
     //return true if the requester has an alias set
-    boolean canalias(HttpServletRequest request) {
-        if (alias_map.containsKey(request.getParameter("ip"))) {
-            return false;
-        } else {
-            return true;
-        }
+    private boolean isAliased(HttpServletRequest request) {
+        return !aliasMap.containsKey(request.getParameter("ip"));
     }
 
     //let the requester know if they have an alias set
-    void canalias(HttpServletRequest request, PrintWriter out) {
-        if (alias_map.containsKey(request.getParameter("ip"))) {
+    private void isAliased(HttpServletRequest request, PrintWriter out) {
+        if (aliasMap.containsKey(request.getParameter("ip"))) {
             out.print("cannotalias");
         } else {
-            out.print("canalias");
+            out.print("isAliased");
         }
     }
 
     //admin: force unset or force change the alias of a user
-    void admin_alias(HttpServletRequest request) {
-        if (config_auth(request.getParameter("pw"))) {
+    private void adminAlias(HttpServletRequest request) {
+        if (configAuth(request.getParameter("pw"))) {
             if (request.getParameter("alias").equals("")) {
-                alias_map.remove(request.getParameter("ip"));
+                aliasMap.remove(request.getParameter("ip"));
                 System.out.println("Alias reset for " + request.getParameter("ip"));
             } else {
-                alias_map.replace(request.getParameter("ip"), request.getParameter("alias"));
+                aliasMap.replace(request.getParameter("ip"), request.getParameter("alias"));
                 System.out.println("Alias changed for " + request.getParameter("ip"));
             }
         }
     }
 
-    boolean config_auth(String user_password) {
+    private boolean configAuth(String password) {
         BufferedReader br;
         String config_password = "";
+
         try {
             br = new BufferedReader(new FileReader("config.ini"));
             config_password = br.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (config_password.equals(user_password)) {
-            return true;
-        } else {
-            return false;
-        }
+
+        return config_password.equals(password);
     }
 }

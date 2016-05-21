@@ -14,11 +14,14 @@ import java.util.concurrent.TimeUnit;
 
 public class MusicGet {
 
-    public static void main(String[] args) throws Exception {
-        final int timeout = 547; //timeout in seconds
-        final String directory = "/musicserver/"; //place in tmp where files will be stored
+    private static final String TEMP_DIR = "musicserver";
 
-        //print out music-get
+    private static final int SEVER_TIMEOUT = 547;
+
+    public static void main(String[] args) throws Exception {
+        final Path filesPath = Paths.get(System.getProperty("java.io.tmpdir"), TEMP_DIR);
+
+        // Print out music-get
         System.out.println("                     _                      _   ");
         System.out.println(" _ __ ___  _   _ ___(_) ___       __ _  ___| |_ ");
         System.out.println("| '_ ` _ \\| | | / __| |/ __|____ / _` |/ _ \\ __|");
@@ -26,50 +29,56 @@ public class MusicGet {
         System.out.println("|_| |_| |_|\\__,_|___/_|\\___|     \\__, |\\___|\\__|");
         System.out.println("                                 |___/          ");
 
+        // Cleanup temp directories
+        cleanupMusicFiles(filesPath);
 
-        //clean out the directory where music files will go
+        // Create the process queue
+        ProcessQueue processQueue = new ProcessQueue();
+
+        // Start the web server and wait for it to spool up
+        StartServer server = new StartServer(processQueue, TEMP_DIR);
+        new Thread(server).start();
+        Thread.sleep(1000);
+
+        // Read items from the queue and play them
+        while (true) {
+            QueueItem nextItem = processQueue.nextItem();
+            if (!nextItem.equals(new QueueItem())) {
+                Path itemPath = Paths.get(filesPath.toString(), nextItem.getDiskName());
+
+                // Play next item in the queue
+                System.out.println("Playing " + nextItem.getRealName());
+                processQueue.setPlayed(nextItem);
+                Process p = Runtime.getRuntime()
+                        .exec("timeout " + SEVER_TIMEOUT + "s mplayer -fs -quiet -af volnorm=2:0.25 " + itemPath.toString());
+
+                try {
+                    p.waitFor(SEVER_TIMEOUT, TimeUnit.SECONDS);
+                    Files.delete(itemPath);
+                } catch (Exception ignored) {
+                }
+            } else {
+                processQueue.getBucketPlayed().clear();
+            }
+            Thread.sleep(1000);
+        }
+    }
+
+    private static void cleanupMusicFiles(Path filesPath) {
         try {
-            Files.walkFileTree(Paths.get(System.getProperty("java.io.tmpdir") + directory), new SimpleFileVisitor<Path>() {
+            // Clean out the directory where music files will go
+            Files.walkFileTree(filesPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }
             });
-            Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory));
-        } catch (Exception ex) {
-        }
-        Files.createDirectory(Paths.get(System.getProperty("java.io.tmpdir") + directory));
+            Files.delete(filesPath);
 
-        //create a queue object
-        ProcessQueue process_queue = new ProcessQueue();
-
-        //start the web server
-        StartServer start_server = new StartServer(process_queue, directory);
-        new Thread(start_server).start();
-
-        //wit for the web server to spool up
-        Thread.sleep(1000);
-
-        //read items from the queue and play them
-        while (true) {
-            QueueItem next_item = process_queue.next_item();
-            if (!next_item.equals(new QueueItem())) {
-                System.out.println("Playing " + next_item.real_name);
-                process_queue.set_played(next_item);
-                Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
-                        + System.getProperty("java.io.tmpdir") + directory + next_item.disk_name);
-
-                try {
-                    p.waitFor(timeout, TimeUnit.SECONDS);
-                    Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
-                } catch (Exception ex) {
-                }
-            } else {
-                process_queue.bucket_played.clear();
-            }
-            Thread.sleep(1000);
+            // Re-create files path for future use
+            Files.createDirectory(filesPath);
+        } catch (Exception ignored) {
         }
     }
-
 }
