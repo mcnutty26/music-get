@@ -25,21 +25,26 @@ public class ProcessQueue {
 
     //return the next item in the bucket to be played
     public QueueItem next_item() {
-        if (!bucket_queue.isEmpty()) {
-            ArrayList<String> played_ips = new ArrayList<>();
-            for (QueueItem item : bucket_played) {
-                played_ips.add(item.ip);
-            }
-            for (QueueItem item : bucket_queue) {
-                if (!played_ips.contains(item.ip)) {
-                    return item;
-                }
-            }
-            System.out.println("REACHED END OF BUCKET");
-            bucket_played.clear();
-            return next_item();
+		//Return an enpty item if there is nothing to play
+        if (bucket_queue.isEmpty()) {
+        	return new QueueItem();
+		}
+
+		//Return the next item in the current bucket
+        ArrayList<String> played_ips = new ArrayList<>();
+        for (QueueItem item : bucket_played) {
+            played_ips.add(item.ip);
         }
-        return new QueueItem();
+        for (QueueItem item : bucket_queue) {
+            if (!played_ips.contains(item.ip)) {
+                return item;
+            }
+        }
+
+		//If the current bucket it empty, start the next one
+        System.out.println("REACHED END OF BUCKET");
+        bucket_played.clear();
+        return next_item();
     }
 
     //move an item from the queue to the played list
