@@ -7,6 +7,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -66,8 +72,11 @@ public class ProcessServer extends AbstractHandler {
                 current(out);
                 break;
             case "/add":
-                add(request);
-                redirect(request, response, "index");
+                if (add(request)) {
+                    redirect(request, response, "index");
+                } else {
+                    redirect(request, response, "uploaderror");
+                }
                 break;
             case "/url":
                 url(request);
@@ -165,21 +174,32 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //add an uploaded file to the queue 
-    void add(HttpServletRequest request) {
+    boolean add(HttpServletRequest request) {
         String guid = UUID.randomUUID().toString();
         Part uploaded_file;
+        boolean added_file = false;
         try {
             uploaded_file = request.getPart("file");
             ;
             uploaded_file.write(directory + guid);
             QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
             if (!new_item.real_name.equals("")) {
-                process_queue.new_item(new_item);
-                System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
+                added_file = process_queue.new_item(new_item);
+                if (added_file) {
+                    System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
+                } else {
+                    System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip);
+                    try {
+                        Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + new_item.disk_name));
+                    } catch (Exception ex) {
+                    }
+                }
             }
         } catch (IOException | ServletException e) {
             e.printStackTrace();
+            return false;
         }
+        return added_file;
     }
 
     //download a video at the supplied URL

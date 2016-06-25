@@ -5,7 +5,12 @@ package mcnutty.music.get;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.UUID;
 
 public class YoutubeDownload implements Runnable {
@@ -59,8 +64,12 @@ public class YoutubeDownload implements Runnable {
 
                 String extension = "";
                 String real_name = sb.toString();
-                process_queue.new_item(new QueueItem(guid + extension, real_name, ip));
                 System.out.println("Downloaded file " + real_name + " for " + ip);
+                if (!process_queue.new_item(new QueueItem(guid + extension, real_name, ip)))
+                {
+                    System.out.println("Deleted downloaded file " + real_name + ": IP's queue full");
+                    Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + guid + extension));
+                }
             } else {
                 System.out.println("Could not download video " + URL + " queued by " + ip);
             }

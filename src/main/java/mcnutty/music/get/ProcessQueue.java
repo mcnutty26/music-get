@@ -11,6 +11,8 @@ public class ProcessQueue {
     public ArrayList<QueueItem> bucket_played;
     public ArrayList<QueueItem> bucket_youtube;
 
+    private static final int max_buckets = 4;
+
     public ProcessQueue() {
         //store items which have been queued and items which have been played this bucket
         bucket_queue = new ArrayList<QueueItem>();
@@ -18,9 +20,20 @@ public class ProcessQueue {
         bucket_youtube = new ArrayList<QueueItem>();
     }
 
-    //add a new item to the queue
-    public void new_item(QueueItem item) {
+    //add a new item to the queue, return false if not allowed
+    public boolean new_item(QueueItem item) {
+        //Count items this IP has already queued
+        int ip_queued = 0;
+        for (QueueItem bucket_item : bucket_queue) {
+            if (bucket_item.ip.equals(item.ip)) {
+                ++ip_queued;
+                if (ip_queued >= max_buckets) {
+                    return false;
+                }
+            }
+        }
         bucket_queue.add(item);
+        return true;
     }
 
     //return the next item in the bucket to be played
