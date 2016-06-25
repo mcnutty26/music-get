@@ -78,3 +78,6 @@ dist/config.ini
 # Executable files
 dist/youtube-dl
 dist/music-get.jar
+
+# Editor backups
+*.swp
