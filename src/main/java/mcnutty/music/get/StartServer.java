@@ -5,20 +5,20 @@ package mcnutty.music.get;
 
 import org.eclipse.jetty.server.Server;
 
-class StartServer implements Runnable {
+public class StartServer implements Runnable {
 
-    private ProcessQueue processQueue;
-    private String directory;
+    ProcessQueue process_queue;
+    String directory;
 
-    StartServer(ProcessQueue processQueue, String directory) {
-        this.processQueue = processQueue;
+    public StartServer(ProcessQueue process_queue, String directory) {
+        this.process_queue = process_queue;
         this.directory = directory;
     }
 
     @Override
     public void run() {
         Server server = new Server(8080);
-        server.setHandler(new ProcessServer(processQueue, directory));
+        server.setHandler(new ProcessServer(process_queue, directory));
         try {
             server.start();
             server.join();

@@ -75,3 +75,10 @@ gradle-app.setting
 # Config stuff
 dist/config.ini
 dist/music-get.jar
+
+# Executable files
+dist/youtube-dl
+dist/music-get.jar
+
+# Editor backups
+*.swp

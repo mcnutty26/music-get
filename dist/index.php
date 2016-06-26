@@ -55,6 +55,11 @@
 			</div>
 
 			<div class="login-form">
+				<?php if ($_GET['error'] == "limit") {?>
+				<div class="alert alert-danger" id="size-error">
+					You can only queue 4 items at a time
+				</div>
+				<?php }?>
 				<form action="http://<?=$server_name?>:8080/add" method="post" enctype="multipart/form-data">
 					<div class="row">
 						<div class="col-xs-6">

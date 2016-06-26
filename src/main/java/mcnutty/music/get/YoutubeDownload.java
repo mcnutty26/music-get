@@ -5,19 +5,24 @@ package mcnutty.music.get;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.UUID;
 
-class YoutubeDownload implements Runnable {
+public class YoutubeDownload implements Runnable {
 
-    private String url;
-    private ProcessQueue processQueue;
-    private String ip;
-    private String directory;
+    String URL;
+    ProcessQueue process_queue;
+    String ip;
+    String directory;
 
-    YoutubeDownload(String url, ProcessQueue processQueue, String ip, String directory) {
-        this.url = url;
-        this.processQueue = processQueue;
+    public YoutubeDownload(String URL, ProcessQueue process_queue, String ip, String directory) {
+        this.URL = URL;
+        this.process_queue = process_queue;
         this.ip = ip;
         this.directory = directory;
     }
@@ -25,20 +30,20 @@ class YoutubeDownload implements Runnable {
     @Override
     public void run() {
         //prevent downloading the wrong video if the link was part of a playlist
-        if (url.contains("youtube.com") && url.contains("&list")) {
-            url = url.substring(0, url.indexOf("&list"));
+        if (URL.contains("youtube.com") && URL.contains("&list")) {
+            URL = URL.substring(0, URL.indexOf("&list"));
         }
 
         //set the item as downloading
-        System.out.println("Starting download of video " + url + " queued by " + ip);
-        QueueItem temp = new QueueItem("null", url, ip);
-        processQueue.getBucketYoutube().add(temp);
+        System.out.println("Starting download of video " + URL + " queued by " + ip);
+        QueueItem temp = new QueueItem("null", URL, ip);
+        process_queue.bucket_youtube.add(temp);
         String guid = UUID.randomUUID().toString();
 
         //get the name of the item
         ProcessBuilder pb = new ProcessBuilder(
                 Paths.get("").toAbsolutePath().toString() + "/youtube-dl", "--get-filename"
-                , "-o%(title)s", "--restrict-filenames", "--no-playlist", url);
+                , "-o%(title)s", "--restrict-filenames", "--no-playlist", URL);
         Process p;
         try {
             p = pb.start();
@@ -52,21 +57,25 @@ class YoutubeDownload implements Runnable {
             //download the actual file and add it to the queue
             if (!sb.toString().equals("")) {
                 ProcessBuilder downloader = new ProcessBuilder(Paths.get("").toAbsolutePath().toString() + "/youtube-dl"
-                        , "-o", System.getProperty("java.io.tmpdir") + directory + guid, "--restrict-filenames", "-f mp4", url);
+                        , "-o", System.getProperty("java.io.tmpdir") + directory + guid, "--restrict-filenames", "-f mp4", URL);
                 Process dl;
                 dl = downloader.start();
                 dl.waitFor();
 
                 String extension = "";
-                String realName = sb.toString();
-                processQueue.newItem(new QueueItem(guid + extension, realName, ip));
-                System.out.println("Downloaded file " + realName + " for " + ip);
+                String real_name = sb.toString();
+                System.out.println("Downloaded file " + real_name + " for " + ip);
+                if (!process_queue.new_item(new QueueItem(guid + extension, real_name, ip)))
+                {
+                    System.out.println("Rejected file " + real_name + " from " + ip + " - too many items queued");
+                    Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + guid + extension));
+                }
             } else {
-                System.out.println("Could not download video " + url + " queued by " + ip);
+                System.out.println("Could not download video " + URL + " queued by " + ip);
             }
 
             //set the download as completed
-            processQueue.getBucketYoutube().remove(temp);
+            process_queue.bucket_youtube.remove(temp);
         } catch (Exception e) {
             e.printStackTrace();
         }
