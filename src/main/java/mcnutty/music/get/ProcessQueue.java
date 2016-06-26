@@ -20,30 +20,37 @@ public class ProcessQueue {
         bucket_youtube = new ArrayList<QueueItem>();
     }
 
-    //add a new item to the queue, return false if not allowed
-    public boolean new_item(QueueItem item) {
+    public boolean ip_can_add(String ip) {
         //Count items this IP has already queued
         int ip_queued = 0;
         for (QueueItem bucket_item : bucket_queue) {
-            if (bucket_item.ip.equals(item.ip)) {
+            if (bucket_item.ip.equals(ip)) {
                 ++ip_queued;
                 if (ip_queued >= max_buckets) {
                     return false;
                 }
             }
         }
-        bucket_queue.add(item);
         return true;
+    }
+
+    //add a new item to the queue, return false if not allowed
+    public boolean new_item(QueueItem item) {
+        if (ip_can_add(item.ip)) {
+            bucket_queue.add(item);
+            return true;
+        }
+        return false;
     }
 
     //return the next item in the bucket to be played
     public QueueItem next_item() {
-		//Return an enpty item if there is nothing to play
+        //Return an enpty item if there is nothing to play
         if (bucket_queue.isEmpty()) {
-        	return new QueueItem();
-		}
+            return new QueueItem();
+        }
 
-		//Return the next item in the current bucket
+        //Return the next item in the current bucket
         ArrayList<String> played_ips = new ArrayList<>();
         for (QueueItem item : bucket_played) {
             played_ips.add(item.ip);
@@ -54,7 +61,7 @@ public class ProcessQueue {
             }
         }
 
-		//If the current bucket it empty, start the next one
+        //If the current bucket it empty, start the next one
         System.out.println("REACHED END OF BUCKET");
         bucket_played.clear();
         return next_item();

@@ -79,8 +79,12 @@ public class ProcessServer extends AbstractHandler {
                 }
                 break;
             case "/url":
-                url(request);
-                redirect(request, response, "index");
+                if (process_queue.ip_can_add(request.getRemoteAddr())) {
+                    url(request);
+                    redirect(request, response, "index");
+                } else {
+                    redirect(request, response, "uploaderror");
+                }
                 break;
             case "/downloading":
                 downloading(request, out);
