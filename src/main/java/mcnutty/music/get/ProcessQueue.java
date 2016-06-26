@@ -20,20 +20,27 @@ public class ProcessQueue {
         bucket_youtube = new ArrayList<QueueItem>();
     }
 
-    //add a new item to the queue, return false if not allowed
-    public boolean new_item(QueueItem item) {
+    public boolean ip_can_add(String ip) {
         //Count items this IP has already queued
         int ip_queued = 0;
         for (QueueItem bucket_item : bucket_queue) {
-            if (bucket_item.ip.equals(item.ip)) {
+            if (bucket_item.ip.equals(ip)) {
                 ++ip_queued;
                 if (ip_queued >= max_buckets) {
                     return false;
                 }
             }
         }
-        bucket_queue.add(item);
         return true;
+    }
+
+    //add a new item to the queue, return false if not allowed
+    public boolean new_item(QueueItem item) {
+        if (ip_can_add(item.ip)) {
+            bucket_queue.add(item);
+            return true;
+        }
+        return false;
     }
 
     //return the next item in the bucket to be played
