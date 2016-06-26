@@ -1,5 +1,5 @@
 //This software is licensed under the GNU GPL v3
-//Written by William Seymour
+//Written by William Seymour and Christopher Leonard
 
 package mcnutty.music.get;
 

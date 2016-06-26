@@ -1,5 +1,5 @@
 //This software is licensed under the GNU GPL v3
-//Written by William Seymour
+//Written by William Seymour and David Richardson
 
 package mcnutty.music.get;
 
@@ -30,13 +30,13 @@ public class QueueItem {
             return false;
         }
         final QueueItem item = (QueueItem) obj;
-        if (disk_name != item.disk_name) {
+        if (!disk_name.equals(item.disk_name)) {
             return false;
         }
-        if (real_name != item.real_name) {
+        if (!real_name.equals(item.real_name)) {
             return false;
         }
-        if (ip != item.ip) {
+        if (!ip.equals(item.ip)) {
             return false;
         }
         return true;
