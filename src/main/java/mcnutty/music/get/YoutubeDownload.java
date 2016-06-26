@@ -67,7 +67,7 @@ public class YoutubeDownload implements Runnable {
                 System.out.println("Downloaded file " + real_name + " for " + ip);
                 if (!process_queue.new_item(new QueueItem(guid + extension, real_name, ip)))
                 {
-                    System.out.println("Deleted downloaded file " + real_name + ": IP's queue full");
+                    System.out.println("Rejected file " + real_name + " from " + ip + " - too many items queued");
                     Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + guid + extension));
                 }
             } else {

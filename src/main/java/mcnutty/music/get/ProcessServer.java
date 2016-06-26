@@ -73,17 +73,17 @@ public class ProcessServer extends AbstractHandler {
                 break;
             case "/add":
                 if (add(request)) {
-                    redirect(request, response, "index");
+                    redirect(request, response, "index", "");
                 } else {
-                    redirect(request, response, "uploaderror");
+                    redirect(request, response, "index", "error=limit");
                 }
                 break;
             case "/url":
                 if (process_queue.ip_can_add(request.getRemoteAddr())) {
                     url(request);
-                    redirect(request, response, "index");
+                    redirect(request, response, "index", "");
                 } else {
-                    redirect(request, response, "uploaderror");
+                    redirect(request, response, "index", "error=limit");
                 }
                 break;
             case "/downloading":
@@ -93,7 +93,7 @@ public class ProcessServer extends AbstractHandler {
                 break;
             case "/alias/add":
                 alias(request);
-                redirect(request, response, "index");
+                redirect(request, response, "index", "");
                 break;
             case "/alias":
                 canalias(request, out);
@@ -106,7 +106,7 @@ public class ProcessServer extends AbstractHandler {
                 break;
             case "/admin/alias":
                 admin_alias(request);
-                redirect(request, response, "admin");
+                redirect(request, response, "admin", "");
             default:
                 out.println("Welcome to the music-get backend!");
         }
@@ -192,7 +192,7 @@ public class ProcessServer extends AbstractHandler {
                 if (added_file) {
                     System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
                 } else {
-                    System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip);
+                    System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip + " - too many items queued");
                     try {
                         Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + new_item.disk_name));
                     } catch (Exception ex) {
@@ -235,9 +235,13 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //redirect the requester back to the front end
-    void redirect(HttpServletRequest request, HttpServletResponse response, String page) {
-        String name = "music.lan"; //request.getLocalAddr();
-        String url = "http://" + name + "/" + page + ".php";
+    void redirect(HttpServletRequest request, HttpServletResponse response, String page, String args) {
+        String name = "music.lan";
+		String addon = "";
+		if (!args.equals("")){
+			addon = "?" + args;
+		}
+        String url = "http://" + name + "/" + page + ".php" + addon;
         response.setContentLength(0);
         try {
             response.sendRedirect(url);
@@ -278,7 +282,7 @@ public class ProcessServer extends AbstractHandler {
             alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
             System.out.println("Added alias " + alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
         } else {
-            System.out.println("Attempted double alias for " + request.getRemoteAddr());
+            System.out.println("Rejected alias from " + request.getRemoteAddr() + " - user already has an alias");
         }
     }
 
