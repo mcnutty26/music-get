@@ -5,22 +5,18 @@ package mcnutty.music.get;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.UUID;
 
-public class YoutubeDownload implements Runnable {
+class YoutubeDownload implements Runnable {
 
-    String URL;
-    ProcessQueue process_queue;
-    String ip;
-    String directory;
+    private String URL;
+    private ProcessQueue process_queue;
+    private String ip;
+    private String directory;
 
-    public YoutubeDownload(String URL, ProcessQueue process_queue, String ip, String directory) {
+    YoutubeDownload(String URL, ProcessQueue process_queue, String ip, String directory) {
         this.URL = URL;
         this.process_queue = process_queue;
         this.ip = ip;
