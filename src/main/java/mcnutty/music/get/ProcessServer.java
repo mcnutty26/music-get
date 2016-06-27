@@ -16,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -130,7 +131,7 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //convert an ArrayList into a JSON array
-    JSONArray json_array_list(ArrayList<QueueItem> queue, HttpServletRequest request) {
+    JSONArray json_array_list(ConcurrentLinkedQueue<QueueItem> queue, HttpServletRequest request) {
         JSONArray output = new JSONArray();
         try {
             for (QueueItem item : queue) {
@@ -160,15 +161,16 @@ public class ProcessServer extends AbstractHandler {
 
     //list the name of the currently playing item 
     void current(PrintWriter out) {
-        try {
-            QueueItem item = process_queue.bucket_played.get(process_queue.bucket_played.size() - 1);
+        QueueItem item = new QueueItem();
+        for (QueueItem lastItem: process_queue.bucket_played) item = lastItem;
+        if (item == new QueueItem()) {
+            out.println("nothing!");
+        } else{
             String display_name = item.ip;
             if (alias_map.containsKey(item.ip)) {
                 display_name = alias_map.get(item.ip);
             }
             out.println(item.real_name + " by " + display_name);
-        } catch (Exception e) {
-            out.println("nothing!");
         }
     }
 

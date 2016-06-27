@@ -4,20 +4,21 @@
 package mcnutty.music.get;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ProcessQueue {
 
-    public ArrayList<QueueItem> bucket_queue;
-    public ArrayList<QueueItem> bucket_played;
-    public ArrayList<QueueItem> bucket_youtube;
+    public ConcurrentLinkedQueue<QueueItem> bucket_queue;
+    public ConcurrentLinkedQueue<QueueItem> bucket_played;
+    public ConcurrentLinkedQueue<QueueItem> bucket_youtube;
 
     private static final int max_buckets = 4;
 
     public ProcessQueue() {
         //store items which have been queued and items which have been played this bucket
-        bucket_queue = new ArrayList<QueueItem>();
-        bucket_played = new ArrayList<QueueItem>();
-        bucket_youtube = new ArrayList<QueueItem>();
+        bucket_queue = new ConcurrentLinkedQueue<>();
+        bucket_played = new ConcurrentLinkedQueue<>();
+        bucket_youtube = new ConcurrentLinkedQueue<>();
     }
 
     public boolean ip_can_add(String ip) {
