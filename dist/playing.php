@@ -3,11 +3,6 @@
 ?>
 
 <table>
-	<tr>
-		<td></td>
-		<td></td>
-		<td></td>
-	</tr>
 	<?php
 		$json = file_get_contents("http://localhost:8080/list");
 		$data = json_decode($json, true);
