@@ -292,7 +292,7 @@ class ProcessServer extends AbstractHandler {
         if (alias_map.containsKey(request.getParameter("ip"))) {
             out.print("cannotalias");
         } else {
-            out.print("can_alias");
+            out.print("canalias");
         }
     }
 
