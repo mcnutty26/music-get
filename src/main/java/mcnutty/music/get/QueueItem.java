@@ -3,43 +3,43 @@
 
 package mcnutty.music.get;
 
-public class QueueItem {
+class QueueItem {
 
-    public String disk_name;
-    public String real_name;
-    public String ip;
+    String disk_name;
+    String real_name;
+    String ip;
 
-    public QueueItem(String disk_name, String real_name, String ip) {
+    QueueItem(String disk_name, String real_name, String ip) {
         this.disk_name = disk_name;
         this.real_name = real_name;
         this.ip = ip;
     }
 
-    public QueueItem() {
+    QueueItem() {
         this.disk_name = null;
         this.real_name = null;
         this.ip = null;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final QueueItem item = (QueueItem) obj;
-        if (disk_name != item.disk_name) {
-            return false;
-        }
-        if (real_name != item.real_name) {
-            return false;
-        }
-        if (ip != item.ip) {
-            return false;
-        }
-        return true;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        QueueItem queueItem = (QueueItem) o;
+
+        if (disk_name != null ? !disk_name.equals(queueItem.disk_name) : queueItem.disk_name != null) return false;
+        if (real_name != null ? !real_name.equals(queueItem.real_name) : queueItem.real_name != null) return false;
+        return ip != null ? ip.equals(queueItem.ip) : queueItem.ip == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = disk_name != null ? disk_name.hashCode() : 0;
+        result = 31 * result + (real_name != null ? real_name.hashCode() : 0);
+        result = 31 * result + (ip != null ? ip.hashCode() : 0);
+        return result;
     }
 
 }

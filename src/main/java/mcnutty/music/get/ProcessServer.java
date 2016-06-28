@@ -163,7 +163,7 @@ public class ProcessServer extends AbstractHandler {
     void current(PrintWriter out) {
         QueueItem item = new QueueItem();
         for (QueueItem lastItem: process_queue.bucket_played) item = lastItem;
-        if (item == new QueueItem()) {
+        if (item.equals(new QueueItem())) {
             out.println("nothing!");
         } else{
             String display_name = item.ip;
