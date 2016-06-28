@@ -6,7 +6,11 @@ One of the (many) music server implementations for UWCS. While the other options
 See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information on how music-get works.
 
 ##Setup
-* create `config.ini` in `dist`, and have it contain the admin password
+* create `config.properties` in `dist`, and optionally have it contain the following key=value pairs:
+  * password (the admin password, no default)
+  * buckets (the maximum number of tracks queued by each user, default is 4)
+  * timeout (the maximum number of seconds a song can play for, default is 547)
+  * directory (the location on disk where uploaded songs are stored, default is `/tmp/musicserver/`)
 * Create an apache virtualhost with the document root pointed at the music-get `dist` folder (a sample config is provided in `dist/apache`)
 * Run `music.get` (this will pull any repo updates, build the project, upgrade youtube-dl, and start the server back end)
 
