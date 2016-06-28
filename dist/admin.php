@@ -3,7 +3,7 @@
 
 <?php
 	$server_name = $_SERVER['SERVER_NAME'];
-	$pw = trim(file_get_contents("config.ini"));
+	$pw = parse_ini_file("config.properties")["password"];
 	session_start();
 	if ($_POST['login'] == 2) {
 		session_destroy();

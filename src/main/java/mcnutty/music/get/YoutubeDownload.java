@@ -53,7 +53,7 @@ class YoutubeDownload implements Runnable {
             //download the actual file and add it to the queue
             if (!sb.toString().equals("")) {
                 ProcessBuilder downloader = new ProcessBuilder(Paths.get("").toAbsolutePath().toString() + "/youtube-dl"
-                        , "-o", System.getProperty("java.io.tmpdir") + directory + guid, "--restrict-filenames", URL);
+                        , "-o", directory + guid, "--restrict-filenames", URL);
                 Process dl;
                 dl = downloader.start();
                 dl.waitFor();
@@ -63,7 +63,7 @@ class YoutubeDownload implements Runnable {
                 if (!process_queue.new_item(new QueueItem(guid, real_name, ip)))
                 {
                     System.out.println("Rejected file " + real_name + " from " + ip + " - too many items queued");
-                    Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + guid));
+                    Files.delete(Paths.get(directory + guid));
                 }
             } else {
                 System.out.println("Could not download video " + URL + " queued by " + ip);

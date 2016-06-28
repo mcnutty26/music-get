@@ -74,6 +74,7 @@ gradle-app.setting
 
 # Config stuff
 dist/config.ini
+dist/config.properties
 
 # Executable files
 dist/youtube-dl

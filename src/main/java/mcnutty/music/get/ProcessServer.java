@@ -3,18 +3,11 @@
 
 package mcnutty.music.get;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.FileVisitResult;
+import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -33,13 +26,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ProcessServer extends AbstractHandler {
+class ProcessServer extends AbstractHandler {
 
-    ProcessQueue process_queue;
-    String directory;
-    HashMap<String, String> alias_map;
+    private ProcessQueue process_queue;
+    private String directory;
+    private HashMap<String, String> alias_map;
 
-    public ProcessServer(ProcessQueue process_queue, String directory) {
+    ProcessServer(ProcessQueue process_queue, String directory) {
         this.process_queue = process_queue;
         this.directory = directory;
         this.alias_map = new HashMap<String, String>();
@@ -97,7 +90,7 @@ public class ProcessServer extends AbstractHandler {
                 redirect(request, response, "index", "");
                 break;
             case "/alias":
-                canalias(request, out);
+                can_alias(request, out);
                 break;
             case "/admin/kill":
                 kill(request);
@@ -116,7 +109,7 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //allow multi part forms (required for file uploads)
-    private static final MultipartConfigElement MULTI_PART_CONFIG = new MultipartConfigElement(System.getProperty("java.io.tmpdir"));
+    private static final MultipartConfigElement MULTI_PART_CONFIG = new MultipartConfigElement("/");
 
     //get the name of an uploaded file
     private String extractFileName(Part part) {
@@ -131,7 +124,7 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //convert an ArrayList into a JSON array
-    JSONArray json_array_list(ConcurrentLinkedQueue<QueueItem> queue, HttpServletRequest request) {
+    private JSONArray json_array_list(ConcurrentLinkedQueue<QueueItem> queue, HttpServletRequest request) {
         JSONArray output = new JSONArray();
         try {
             for (QueueItem item : queue) {
@@ -155,12 +148,12 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //list the currently queued items
-    void list(HttpServletRequest request, PrintWriter out) {
+    private void list(HttpServletRequest request, PrintWriter out) {
         out.println(json_array_list(process_queue.bucket_queue, request));
     }
 
     //list the name of the currently playing item 
-    void current(PrintWriter out) {
+    private void current(PrintWriter out) {
         QueueItem item = new QueueItem();
         for (QueueItem lastItem: process_queue.bucket_played) item = lastItem;
         if (item.equals(new QueueItem())) {
@@ -175,12 +168,12 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //list the items which have been played this bucket
-    void last(HttpServletRequest request, PrintWriter out) {
+    private void last(HttpServletRequest request, PrintWriter out) {
         out.println(json_array_list(process_queue.bucket_played, request));
     }
 
     //add an uploaded file to the queue 
-    boolean add(HttpServletRequest request) {
+    private boolean add(HttpServletRequest request) {
         String guid = UUID.randomUUID().toString();
         Part uploaded_file;
         boolean added_file = false;
@@ -196,8 +189,9 @@ public class ProcessServer extends AbstractHandler {
                 } else {
                     System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip + " - too many items queued");
                     try {
-                        Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + new_item.disk_name));
-                    } catch (Exception ex) {
+                        Files.delete(Paths.get(directory + new_item.disk_name));
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -209,7 +203,7 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //download a video at the supplied URL
-    void url(HttpServletRequest request) {
+    private void url(HttpServletRequest request) {
         if (!request.getParameter("url").equals("")) {
             YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
             ExecutorService executor = Executors.newCachedThreadPool();
@@ -218,12 +212,12 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //list the currently downloading items
-    void downloading(HttpServletRequest request, PrintWriter out) {
+    private void downloading(HttpServletRequest request, PrintWriter out) {
         out.println(json_array_list(process_queue.bucket_youtube, request));
     }
 
     //remove an item from the queue
-    void remove(HttpServletRequest request) {
+    private void remove(HttpServletRequest request) {
         QueueItem match = null;
         for (QueueItem item : process_queue.bucket_queue) {
             if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getRemoteAddr().toString())) {
@@ -237,7 +231,7 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //redirect the requester back to the front end
-    void redirect(HttpServletRequest request, HttpServletResponse response, String page, String args) {
+    private void redirect(HttpServletRequest request, HttpServletResponse response, String page, String args) {
         String name = "music.lan";
 		String addon = "";
 		if (!args.equals("")){
@@ -253,8 +247,8 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //admin: kill the currently playing item
-    void kill(HttpServletRequest request) {
-        if (config_auth(request.getParameter("pw"))) {
+    private void kill(HttpServletRequest request) {
+        if (auth(request.getParameter("pw"))) {
             try {
                 Runtime.getRuntime().exec("killall mplayer");
                 System.out.println("Current item killed");
@@ -265,22 +259,22 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //admin: remove any item from the queue
-    void admin_remove(HttpServletRequest request) {
+    private void admin_remove(HttpServletRequest request) {
         QueueItem match = null;
         for (QueueItem item : process_queue.bucket_queue) {
             if (item.disk_name.equals(request.getParameter("guid"))) {
                 match = item;
             }
         }
-        if (config_auth(request.getParameter("pw"))) {
+        if (auth(request.getParameter("pw"))) {
             process_queue.delete_item(match);
             System.out.println("Item " + match.real_name + " removed from queue by admin");
         }
     }
 
     //add an alias for the requester if they don't already have one
-    void alias(HttpServletRequest request) {
-        if (canalias(request) && !request.getParameter("alias").equals("")) {
+    private void alias(HttpServletRequest request) {
+        if (can_alias(request) && !request.getParameter("alias").equals("")) {
             alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
             System.out.println("Added alias " + alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
         } else {
@@ -289,26 +283,22 @@ public class ProcessServer extends AbstractHandler {
     }
 
     //return true if the requester has an alias set
-    boolean canalias(HttpServletRequest request) {
-        if (alias_map.containsKey(request.getParameter("ip"))) {
-            return false;
-        } else {
-            return true;
-        }
+    private boolean can_alias(HttpServletRequest request) {
+        return !alias_map.containsKey(request.getParameter("ip"));
     }
 
     //let the requester know if they have an alias set
-    void canalias(HttpServletRequest request, PrintWriter out) {
+    private void can_alias(HttpServletRequest request, PrintWriter out) {
         if (alias_map.containsKey(request.getParameter("ip"))) {
             out.print("cannotalias");
         } else {
-            out.print("canalias");
+            out.print("can_alias");
         }
     }
 
     //admin: force unset or force change the alias of a user
-    void admin_alias(HttpServletRequest request) {
-        if (config_auth(request.getParameter("pw"))) {
+    private void admin_alias(HttpServletRequest request) {
+        if (auth(request.getParameter("pw"))) {
             if (request.getParameter("alias").equals("")) {
                 alias_map.remove(request.getParameter("ip"));
                 System.out.println("Alias reset for " + request.getParameter("ip"));
@@ -319,19 +309,18 @@ public class ProcessServer extends AbstractHandler {
         }
     }
 
-    boolean config_auth(String user_password) {
-        BufferedReader br;
-        String config_password = "";
+    private boolean auth(String user_password) {
+        Properties prop = new Properties();
+        InputStream input;
         try {
-            br = new BufferedReader(new FileReader("config.ini"));
-            config_password = br.readLine();
+            input = new FileInputStream("config.properties");
+            prop.load(input);
+            if (prop.getProperty("password").equals(user_password)) {
+                return true;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (config_password.equals(user_password)) {
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 }

@@ -6,22 +6,24 @@ package mcnutty.music.get;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ProcessQueue {
+class ProcessQueue {
 
-    public ConcurrentLinkedQueue<QueueItem> bucket_queue;
-    public ConcurrentLinkedQueue<QueueItem> bucket_played;
-    public ConcurrentLinkedQueue<QueueItem> bucket_youtube;
+    ConcurrentLinkedQueue<QueueItem> bucket_queue;
+    ConcurrentLinkedQueue<QueueItem> bucket_played;
+    ConcurrentLinkedQueue<QueueItem> bucket_youtube;
 
-    private static final int max_buckets = 4;
+    private int max_buckets;
 
-    public ProcessQueue() {
+    ProcessQueue(int buckets) {
         //store items which have been queued and items which have been played this bucket
         bucket_queue = new ConcurrentLinkedQueue<>();
         bucket_played = new ConcurrentLinkedQueue<>();
         bucket_youtube = new ConcurrentLinkedQueue<>();
+
+        max_buckets = buckets;
     }
 
-    public boolean ip_can_add(String ip) {
+    boolean ip_can_add(String ip) {
         //Count items this IP has already queued
         int ip_queued = 0;
         for (QueueItem bucket_item : bucket_queue) {
@@ -36,7 +38,7 @@ public class ProcessQueue {
     }
 
     //add a new item to the queue, return false if not allowed
-    public boolean new_item(QueueItem item) {
+    boolean new_item(QueueItem item) {
         if (ip_can_add(item.ip)) {
             bucket_queue.add(item);
             return true;
@@ -45,7 +47,7 @@ public class ProcessQueue {
     }
 
     //return the next item in the bucket to be played
-    public QueueItem next_item() {
+    QueueItem next_item() {
         //Return an enpty item if there is nothing to play
         if (bucket_queue.isEmpty()) {
             return new QueueItem();
@@ -69,13 +71,13 @@ public class ProcessQueue {
     }
 
     //move an item from the queue to the played list
-    public void set_played(QueueItem item) {
+    void set_played(QueueItem item) {
         bucket_queue.remove(item);
         bucket_played.add(item);
     }
 
     //remove an item from the queue
-    public void delete_item(QueueItem item) {
+    void delete_item(QueueItem item) {
         bucket_queue.remove(item);
     }
 }

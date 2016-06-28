@@ -3,20 +3,21 @@
 
 package mcnutty.music.get;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class MusicGet {
 
     public static void main(String[] args) throws Exception {
-        final int timeout = 547; //timeout in seconds
-        final String directory = "/musicserver/"; //place in tmp where files will be stored
 
         //print out music-get
         System.out.println("                     _                      _   ");
@@ -26,23 +27,59 @@ public class MusicGet {
         System.out.println("|_| |_| |_|\\__,_|___/_|\\___|     \\__, |\\___|\\__|");
         System.out.println("                                 |___/          ");
 
+        //these will always be initialised later (but the compiler doesn't know that)
+        int timeout = 0;
+        int buckets = 0;
+        String directory = "";
+        Properties prop = new Properties();
+        InputStream input;
+        try {
+            input = new FileInputStream("config.properties");
+            prop.load(input);
+            if (prop.getProperty("buckets") != null){
+                buckets = Integer.parseInt(prop.getProperty("buckets"));
+            } else {
+                System.out.println("Error reading config property 'buckets' - using default value of 4\n");
+                buckets = 4;
+            }
+            if (prop.getProperty("timeout") != null){
+                timeout = Integer.parseInt(prop.getProperty("timeout"));
+            } else {
+                System.out.println("Error reading config property 'timeout' - using default value of 547\n");
+                timeout = 547;
+            }
+            if (prop.getProperty("directory") != null) {
+                directory = prop.getProperty("directory");
+            } else {
+                System.out.println("Error reading config property 'directory' - using default value of /tmp/musicserver/\n");
+                directory = "/tmp/musicserver";
+            }
+            if (prop.getProperty("password") == null) {
+                System.out.println("Error reading config property 'password' - no default value, exiting\n");
+                System.exit(1);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading config file");
+            System.exit(1);
+        }
 
         //clean out the directory where music files will go
         try {
-            Files.walkFileTree(Paths.get(System.getProperty("java.io.tmpdir") + directory), new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(Paths.get(directory), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }
             });
-            Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory));
-        } catch (Exception ex) {
+            Files.delete(Paths.get(directory));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        Files.createDirectory(Paths.get(System.getProperty("java.io.tmpdir") + directory));
+        Files.createDirectory(Paths.get(directory));
 
         //create a queue object
-        ProcessQueue process_queue = new ProcessQueue();
+        ProcessQueue process_queue = new ProcessQueue(buckets);
 
         //start the web server
         StartServer start_server = new StartServer(process_queue, directory);
@@ -58,12 +95,13 @@ public class MusicGet {
                 System.out.println("Playing " + next_item.real_name);
                 process_queue.set_played(next_item);
                 Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
-                        + System.getProperty("java.io.tmpdir") + directory + next_item.disk_name);
+                        + directory + next_item.disk_name);
 
                 try {
                     p.waitFor(timeout, TimeUnit.SECONDS);
-                    Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + directory + next_item.disk_name));
-                } catch (Exception ex) {
+                    Files.delete(Paths.get(directory + next_item.disk_name));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } else {
                 process_queue.bucket_played.clear();
