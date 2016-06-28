@@ -52,7 +52,7 @@ public class MusicGet {
                 directory = prop.getProperty("directory");
             } else {
                 System.out.println("Error reading config property 'directory' - using default value of /tmp/musicserver/\n");
-                directory = "/tmp/musicserver";
+                directory = "/tmp/musicserver/";
             }
             if (prop.getProperty("password") == null) {
                 System.out.println("Error reading config property 'password' - no default value, exiting\n");
