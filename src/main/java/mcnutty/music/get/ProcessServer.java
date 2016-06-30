@@ -163,7 +163,7 @@ class ProcessServer extends AbstractHandler {
             if (alias_map.containsKey(item.ip)) {
                 display_name = alias_map.get(item.ip);
             }
-            out.println(item.real_name + " by " + display_name);
+            out.println((item.real_name.length() > 61 ? item.real_name.substring(0, 60) : item.real_name) + " by " + (display_name.length() > 21 ? display_name.substring(0, 20) : display_name));
         }
     }
 
