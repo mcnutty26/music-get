@@ -1,7 +1,14 @@
 table {
-	width:75%; 
-	margin-left:5%;
-	margin-right:5%; 
+	border-collapse: separate;
+	border-spacing: 60px 0px;
+}
+
+.song{
+	width: 70%;
+}
+
+.name{
+	width: 30%;
 }
 
 .clickable {

@@ -40,8 +40,8 @@
 			foreach ($bucket as $item) {
 				$guid = $item[2];
 				echo "<tr>";
-				echo "<td><a href=\"files/" . $guid . "\">" . htmlspecialchars(substr($item[0], 0, 60)) . "</a></td>";
-				echo "<td>" . htmlspecialchars(($item[3] != "" ? substr($item[3], 0, 20) : $item[1])) . "</td>";
+				echo "<td class=\"song\"><a href=\"files/" . $guid . "\">" . htmlspecialchars(substr($item[0], 0, 60)) . "</a></td>";
+				echo "<td class=\"name\">" . htmlspecialchars(($item[3] != "" ? substr($item[3], 0, 20) : $item[1])) . "</td>";
 				echo "<td>" . ($client_ip == $item[1] ? "<a class=\"fui-cross clickable\" onclick=\"remove_item('$guid')\"></a>" : "") . "</td>";
 				echo "</tr>";
 			}
