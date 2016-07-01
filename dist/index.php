@@ -57,7 +57,7 @@
 			<div class="login-form">
 				<?php if ($_GET['error'] == "limit") {?>
 				<div class="alert alert-danger" id="size-error">
-					You can only queue 4 items at a time
+					You already have the maximum number of items queued!
 				</div>
 				<?php }?>
 				<form action="http://<?=$server_name?>:8080/add" method="post" enctype="multipart/form-data">

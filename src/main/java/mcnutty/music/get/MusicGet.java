@@ -32,19 +32,12 @@ public class MusicGet {
         System.out.println("                                 |___/          \n");
 
         //these will always be initialised later (but the compiler doesn't know that)
-        int timeout = 0;
         String directory = "";
         Properties prop = new Properties();
         InputStream input;
         try {
             input = new FileInputStream("config.properties");
             prop.load(input);
-            if (prop.getProperty("timeout") != null){
-                timeout = Integer.parseInt(prop.getProperty("timeout"));
-            } else {
-                System.out.println("Error reading config property 'timeout' - using default value of 547\n");
-                timeout = 547;
-            }
             if (prop.getProperty("directory") != null) {
                 directory = prop.getProperty("directory");
             } else {
@@ -55,6 +48,7 @@ public class MusicGet {
                 System.out.println("Error reading config property 'password' - no default value, exiting\n");
                 System.exit(1);
             }
+            input.close();
         } catch (IOException e) {
             System.out.println("Error reading config file");
             System.exit(1);
@@ -111,6 +105,17 @@ public class MusicGet {
         while (true) {
             QueueItem next_item = process_queue.next_item();
             if (!next_item.equals(new QueueItem())) {
+                //Check the timeout
+                int timeout = 547;
+                try {
+                    input = new FileInputStream("config.properties");
+                    prop.load(input);
+                    timeout = Integer.parseInt(prop.getProperty("timeout"));
+                    input.close();
+                    System.out.println(timeout);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 System.out.println("Playing " + next_item.real_name);
                 process_queue.set_played(next_item);
                 process_queue.save_queue();
