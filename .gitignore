@@ -75,6 +75,7 @@ gradle-app.setting
 # Config stuff
 dist/config.ini
 dist/config.properties
+dist/queue.json
 
 # Executable files
 dist/youtube-dl

@@ -13,7 +13,11 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MusicGet {
 
@@ -25,7 +29,7 @@ public class MusicGet {
         System.out.println("| '_ ` _ \\| | | / __| |/ __|____ / _` |/ _ \\ __|");
         System.out.println("| | | | | | |_| \\__ \\ | (_|_____| (_| |  __/ |_ ");
         System.out.println("|_| |_| |_|\\__,_|___/_|\\___|     \\__, |\\___|\\__|");
-        System.out.println("                                 |___/          ");
+        System.out.println("                                 |___/          \n");
 
         //these will always be initialised later (but the compiler doesn't know that)
         int timeout = 0;
@@ -63,23 +67,45 @@ public class MusicGet {
             System.exit(1);
         }
 
-        //clean out the directory where music files will go
-        try {
-            Files.walkFileTree(Paths.get(directory), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-            Files.delete(Paths.get(directory));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Files.createDirectory(Paths.get(directory));
-
         //create a queue object
         ProcessQueue process_queue = new ProcessQueue(buckets);
+
+        try {
+            if (args.length > 0 && args[0].equals("clean")){
+                Files.delete(Paths.get("queue.json"));
+            }
+            //load an existing queue if possible
+            String raw_queue = Files.readAllLines(Paths.get("queue.json")).toString();
+            JSONArray queue_state = new JSONArray(raw_queue);
+            ConcurrentLinkedQueue<QueueItem> loaded_queue = new ConcurrentLinkedQueue<>();
+            JSONArray queue = queue_state.getJSONArray(0);
+            for (int i = 0; i < queue.length(); i++){
+                JSONObject item = ((JSONObject) queue.get(i));
+                QueueItem loaded_item = new QueueItem();
+                loaded_item.ip = item.getString("ip");
+                loaded_item.real_name = item.getString("name");
+                loaded_item.disk_name = item.getString("guid");
+                loaded_queue.add(loaded_item);
+            }
+            process_queue.bucket_queue = loaded_queue;
+            System.out.println("Loaded queue from disk\n");
+        } catch (Exception ex) {
+            //otherwise clean out the music directory and start a new queue
+            try {
+                Files.walkFileTree(Paths.get(directory), new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+                Files.delete(Paths.get(directory));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Files.createDirectory(Paths.get(directory));
+            System.out.println("Created a new queue\n");
+        }
 
         //start the web server
         StartServer start_server = new StartServer(process_queue, directory);
@@ -100,6 +126,7 @@ public class MusicGet {
                 try {
                     p.waitFor(timeout, TimeUnit.SECONDS);
                     Files.delete(Paths.get(directory + next_item.disk_name));
+                    process_queue.save_queue();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -109,5 +136,4 @@ public class MusicGet {
             Thread.sleep(1000);
         }
     }
-
 }

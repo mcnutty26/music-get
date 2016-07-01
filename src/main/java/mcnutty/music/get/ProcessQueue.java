@@ -3,14 +3,23 @@
 
 package mcnutty.music.get;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 class ProcessQueue {
 
     ConcurrentLinkedQueue<QueueItem> bucket_queue;
     ConcurrentLinkedQueue<QueueItem> bucket_played;
     ConcurrentLinkedQueue<QueueItem> bucket_youtube;
+    HashMap<String, String> alias_map;
 
     private int max_buckets;
 
@@ -19,7 +28,7 @@ class ProcessQueue {
         bucket_queue = new ConcurrentLinkedQueue<>();
         bucket_played = new ConcurrentLinkedQueue<>();
         bucket_youtube = new ConcurrentLinkedQueue<>();
-
+        alias_map = new HashMap<>();
         max_buckets = buckets;
     }
 
@@ -41,6 +50,7 @@ class ProcessQueue {
     boolean new_item(QueueItem item) {
         if (ip_can_add(item.ip)) {
             bucket_queue.add(item);
+            save_queue();
             return true;
         }
         return false;
@@ -54,10 +64,7 @@ class ProcessQueue {
         }
 
         //Return the next item in the current bucket
-        ArrayList<String> played_ips = new ArrayList<>();
-        for (QueueItem item : bucket_played) {
-            played_ips.add(item.ip);
-        }
+        ArrayList<String> played_ips = bucket_played.stream().map(item -> item.ip).collect(Collectors.toCollection(ArrayList::new));
         for (QueueItem item : bucket_queue) {
             if (!played_ips.contains(item.ip)) {
                 return item;
@@ -74,10 +81,45 @@ class ProcessQueue {
     void set_played(QueueItem item) {
         bucket_queue.remove(item);
         bucket_played.add(item);
+        save_queue();
     }
 
     //remove an item from the queue
     void delete_item(QueueItem item) {
         bucket_queue.remove(item);
+        save_queue();
+    }
+
+    //convert a ConcurrentLinkedQueue into a JSON array
+    JSONArray json_array_list(ConcurrentLinkedQueue<QueueItem> queue) {
+        JSONArray output = new JSONArray();
+        try {
+            for (QueueItem item : queue) {
+                JSONObject object = new JSONObject();
+                object.put("name", item.real_name);
+                object.put("guid", item.disk_name);
+                object.put("ip", item.ip);
+
+                if (alias_map.containsKey(item.ip)) {
+                    object.put("alias", alias_map.get(item.ip));
+                } else {
+                    object.put("alias", "");
+                }
+
+                output.put(object);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return output;
+    }
+
+    //write the queue to disk
+    void save_queue(){
+        try(PrintWriter file = new PrintWriter("queue.json")){
+            file.println(json_array_list(bucket_queue).toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

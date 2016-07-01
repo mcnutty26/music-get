@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/music-get.iml" filepath="$PROJECT_DIR$/.idea/modules/music-get.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/music-get_main.iml" filepath="$PROJECT_DIR$/.idea/modules/music-get_main.iml" group="music-get" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/music-get_test.iml" filepath="$PROJECT_DIR$/.idea/modules/music-get_test.iml" group="music-get" />
     </modules>
   </component>
 </project>
