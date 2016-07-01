@@ -13,6 +13,7 @@ See the [wiki](https://github.com/mcnutty26/music-get/wiki) for more information
   * directory (the location on disk where uploaded songs are stored, default is `/tmp/musicserver/`)
 * Create an apache virtualhost with the document root pointed at the music-get `dist` folder (a sample config is provided in `dist/apache`)
 * Run `music.get` (this will pull any repo updates, build the project, upgrade youtube-dl, and start the server back end)
+* Optionally run `java -jar music-get.jar clean` to clean out all media files and reset the queue state
 
 ##API:
 ##### /list returns a JSON array representing the current queue 
