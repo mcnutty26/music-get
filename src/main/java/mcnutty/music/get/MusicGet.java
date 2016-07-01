@@ -107,9 +107,7 @@ public class MusicGet {
                 int timeout = 547;
                 try (FileInputStream input = new FileInputStream("config.properties")) {
                     prop.load(input);
-                    if (prop.getProperty("timeout") != null) {
-                        timeout = Integer.parseInt(prop.getProperty("timeout"));
-                    }
+                    timeout = Integer.parseInt(prop.getProperty("timeout", "547"));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
