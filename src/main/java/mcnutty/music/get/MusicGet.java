@@ -34,9 +34,8 @@ public class MusicGet {
         //these will always be initialised later (but the compiler doesn't know that)
         String directory = "";
         Properties prop = new Properties();
-        InputStream input;
-        try {
-            input = new FileInputStream("config.properties");
+
+        try (InputStream input = new FileInputStream("config.properties")) {
             prop.load(input);
             if (prop.getProperty("directory") != null) {
                 directory = prop.getProperty("directory");
@@ -48,7 +47,6 @@ public class MusicGet {
                 System.out.println("Error reading config property 'password' - no default value, exiting\n");
                 System.exit(1);
             }
-            input.close();
         } catch (IOException e) {
             System.out.println("Error reading config file");
             System.exit(1);
@@ -107,12 +105,9 @@ public class MusicGet {
             if (!next_item.equals(new QueueItem())) {
                 //Check the timeout
                 int timeout = 547;
-                try {
-                    input = new FileInputStream("config.properties");
+                try (FileInputStream input = new FileInputStream("config.properties")) {
                     prop.load(input);
                     timeout = Integer.parseInt(prop.getProperty("timeout"));
-                    input.close();
-                    System.out.println(timeout);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

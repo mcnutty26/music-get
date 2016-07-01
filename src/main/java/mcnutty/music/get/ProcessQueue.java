@@ -32,13 +32,10 @@ class ProcessQueue {
     boolean ip_can_add(String ip) {
         //Check the max number of buckets
         Properties prop = new Properties();
-        InputStream input;
         int max_buckets = 4;
-        try {
-            input = new FileInputStream("config.properties");
+        try (InputStream input = new FileInputStream("config.properties")) {
             prop.load(input);
             max_buckets = Integer.parseInt(prop.getProperty("buckets"));
-            input.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
