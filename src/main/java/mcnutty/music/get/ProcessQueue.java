@@ -7,10 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -21,18 +21,27 @@ class ProcessQueue {
     ConcurrentLinkedQueue<QueueItem> bucket_youtube;
     HashMap<String, String> alias_map;
 
-    private int max_buckets;
-
-    ProcessQueue(int buckets) {
+    ProcessQueue() {
         //store items which have been queued and items which have been played this bucket
         bucket_queue = new ConcurrentLinkedQueue<>();
         bucket_played = new ConcurrentLinkedQueue<>();
         bucket_youtube = new ConcurrentLinkedQueue<>();
         alias_map = new HashMap<>();
-        max_buckets = buckets;
     }
 
     boolean ip_can_add(String ip) {
+        //Check the max number of buckets
+        Properties prop = new Properties();
+        InputStream input;
+        int max_buckets = 4;
+        try {
+            input = new FileInputStream("config.properties");
+            prop.load(input);
+            max_buckets = Integer.parseInt(prop.getProperty("buckets"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         //Count items this IP has already queued
         int ip_queued = 0;
         for (QueueItem bucket_item : bucket_queue) {

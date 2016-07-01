@@ -33,19 +33,12 @@ public class MusicGet {
 
         //these will always be initialised later (but the compiler doesn't know that)
         int timeout = 0;
-        int buckets = 0;
         String directory = "";
         Properties prop = new Properties();
         InputStream input;
         try {
             input = new FileInputStream("config.properties");
             prop.load(input);
-            if (prop.getProperty("buckets") != null){
-                buckets = Integer.parseInt(prop.getProperty("buckets"));
-            } else {
-                System.out.println("Error reading config property 'buckets' - using default value of 4\n");
-                buckets = 4;
-            }
             if (prop.getProperty("timeout") != null){
                 timeout = Integer.parseInt(prop.getProperty("timeout"));
             } else {
@@ -68,7 +61,7 @@ public class MusicGet {
         }
 
         //create a queue object
-        ProcessQueue process_queue = new ProcessQueue(buckets);
+        ProcessQueue process_queue = new ProcessQueue();
 
         try {
             if (args.length > 0 && args[0].equals("clean")){
@@ -120,13 +113,13 @@ public class MusicGet {
             if (!next_item.equals(new QueueItem())) {
                 System.out.println("Playing " + next_item.real_name);
                 process_queue.set_played(next_item);
+                process_queue.save_queue();
                 Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
                         + directory + next_item.disk_name);
 
                 try {
                     p.waitFor(timeout, TimeUnit.SECONDS);
                     Files.delete(Paths.get(directory + next_item.disk_name));
-                    process_queue.save_queue();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
