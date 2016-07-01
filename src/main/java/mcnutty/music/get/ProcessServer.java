@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -126,15 +127,9 @@ class ProcessServer extends AbstractHandler {
     private void current(PrintWriter out) {
         QueueItem item = new QueueItem();
         for (QueueItem lastItem: process_queue.bucket_played) item = lastItem;
-        if (item.equals(new QueueItem())) {
-            out.println("nothing!");
-        } else{
-            String display_name = item.ip;
-            if (process_queue.alias_map.containsKey(item.ip)) {
-                display_name = process_queue.alias_map.get(item.ip);
-            }
-            out.println((item.real_name.length() > 61 ? item.real_name.substring(0, 60) : item.real_name) + " by " + (display_name.length() > 21 ? display_name.substring(0, 20) : display_name));
-        }
+        ConcurrentLinkedQueue<QueueItem> currently_playing = new ConcurrentLinkedQueue<>();
+        currently_playing.add(item);
+        out.println(process_queue.json_array_list(currently_playing));
     }
 
     //list the items which have been played this bucket

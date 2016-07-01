@@ -92,7 +92,7 @@
 				<div class="form-group">
 					<div id="downloading">
 					</div>
-					<h6 id="current"><?=htmlspecialchars(substr(file_get_contents("http://localhost:8080/current"), 0, 60))?></h6>
+					<h6 id="current"><?=file_get_contents("http://music.lan/current.php")?></h6>
 					<div id="playing">
 						<?=file_get_contents("http://music.lan/playing.php")?>
 					</div>
@@ -133,7 +133,7 @@
 		function init(){
 			document.cookie = "music-get-client=<?=$client_ip?>";
 			window.setInterval(function(){
-				$.ajax({url: 'http://<?=$server_name?>:8080/current', method: 'POST'})
+				$.ajax({url: 'http://<?=$server_name?>/current.php', method: 'POST'})
 					.done(function(data){document.getElementById("current").innerHTML = data;});
 				$.ajax({url: 'http://<?=$server_name?>/playing.php', method: 'POST'})
 					.done(function(data){document.getElementById("playing").innerHTML = data;});
