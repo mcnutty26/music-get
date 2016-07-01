@@ -34,8 +34,8 @@ class ProcessQueue {
         Properties prop = new Properties();
         int max_buckets = 4;
         try (InputStream input = new FileInputStream("config.properties")) {
+            prop.load(input);
             if (prop.getProperty("buckets") != null) {
-                prop.load(input);
                 max_buckets = Integer.parseInt(prop.getProperty("buckets"));
             }
         } catch (Exception e) {
