@@ -124,7 +124,12 @@ class ProcessQueue {
     //write the queue to disk
     void save_queue(){
         try(PrintWriter file = new PrintWriter("queue.json")){
-            file.println(json_array_list(bucket_queue).toString());
+            ConcurrentLinkedQueue<QueueItem> queue_dump = new ConcurrentLinkedQueue<>();
+            QueueItem last_item = new QueueItem();
+            for (QueueItem item: bucket_played) last_item = item;
+            queue_dump.add(last_item);
+            queue_dump.addAll(bucket_queue);
+            file.println(json_array_list(queue_dump).toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
