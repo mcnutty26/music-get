@@ -55,6 +55,9 @@
 			</div>
 
 			<div class="login-form">
+				<div class="alert alert-info" id"size-error">
+					Make queueing your favourite memes easier with the new <a target="blank" href="https://chrome.google.com/webstore/detail/music-get-autoqueue/iomcfpdngiolnefjdehdaoanlilbjiml">chrome extension</a>!
+				</div>
 				<?php if ($_GET['error'] == "limit") {?>
 				<div class="alert alert-danger" id="size-error">
 					You already have the maximum number of items queued!
