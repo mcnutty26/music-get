@@ -73,9 +73,9 @@
 								<td></td>
 							</tr>
 							<?php
-								$json = file_get_contents("http://localhost:8080/list");
+								$json = file_get_contents("http://localhost/api/list");
 								$data = json_decode($json, true);
-								$json_last = file_get_contents("http://localhost:8080/last");
+								$json_last = file_get_contents("http://localhost/api/last");
 								$data_last = json_decode($json_last, true);
 								$queue = array();
 								$queue_temp = array();
@@ -135,7 +135,7 @@
 
 					<div class="form-row">
 						<h6>Change the alias of a user</h6>
-						<form action="http://<?=$server_name?>:8080/admin/alias" method="post" enctype="multipart/form-data">
+						<form action="http://<?=$server_name?>/api/admin/alias" method="post" enctype="multipart/form-data">
 							<input type="hidden" name="pw" value="<?=$_SESSION['login']?>" />
 							<div class="row">
 								<div class="col-xs-4">
@@ -171,13 +171,13 @@
 
 					<script>
 						function remove_item(arg) {
-							$.ajax({url: 'http://<?=$server_name?>:8080/admin/remove',
+							$.ajax({url: 'http://<?=$server_name?>/api/admin/remove',
 								method: 'POST',
 								data: {'guid': arg, 'pw' : '<?=$pw?>'}})
 								location.replace('http://<?=$server_name?>/admin.php');
 						}
 						function remove_current() {
-							$.ajax({url: 'http://<?=$server_name?>:8080/admin/kill',
+							$.ajax({url: 'http://<?=$server_name?>/api/admin/kill',
 								method: 'POST',
 								data: {'pw' : '<?=$pw?>'}})
 								location.replace('http://<?=$server_name?>/admin.php');

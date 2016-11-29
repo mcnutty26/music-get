@@ -63,7 +63,7 @@
 					You already have the maximum number of items queued!
 				</div>
 				<?php }?>
-				<form action="http://<?=$server_name?>:8080/add" method="post" enctype="multipart/form-data">
+				<form action="http://<?=$server_name?>/api/add" method="post" enctype="multipart/form-data">
 					<div class="row">
 						<div class="col-xs-6">
 			  				<div class="form-group">
@@ -77,7 +77,7 @@
 						</div>
 					</div>
 				</form>
-				<form action="http://<?=$server_name?>:8080/url" method="post" enctype="multipart/form-data">
+				<form action="http://<?=$server_name?>/api/url" method="post" enctype="multipart/form-data">
 					<div class="row">
 						<div class="col-xs-6">
 							<div class="form-group">
@@ -101,10 +101,10 @@
 					</div>
 				</div>
 
-				<?php if (file_get_contents("http://localhost:8080/alias?ip=" . rawurlencode($client_ip)) == "canalias") {?>
+				<?php if (file_get_contents("http://localhost/api/alias?ip=" . rawurlencode($client_ip)) == "canalias") {?>
 				<div class="form-row">
 					<h6>Set an alias for yourself (once per LAN)</h6>
-					<form action="http://<?=$server_name?>:8080/alias/add" method="post" enctype="multipart/form-data">
+					<form action="http://<?=$server_name?>/api/alias/add" method="post" enctype="multipart/form-data">
 						<div class="row">
 							<div class="col-xs-6">
 								<div class="form-group">
@@ -130,7 +130,7 @@
 
 		<script>
 		function remove_item(arg) {
-			$.ajax({url: 'http://<?=$server_name?>:8080/remove',
+			$.ajax({url: 'http://<?=$server_name?>/api/remove',
 				method: 'POST', data: {'guid': arg}})
 		}
 		function init(){

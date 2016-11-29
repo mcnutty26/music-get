@@ -4,9 +4,9 @@
 
 <table>
 	<?php
-		$json = file_get_contents("http://localhost:8080/list");
+		$json = file_get_contents("http://localhost/api/list");
 		$data = json_decode($json, true);
-		$json_last = file_get_contents("http://localhost:8080/last");
+		$json_last = file_get_contents("http://localhost/api/last");
 		$data_last = json_decode($json_last, true);
 
 		$queue = array();
