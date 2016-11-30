@@ -37,7 +37,7 @@ class ProcessServer extends AbstractHandler {
                        HttpServletResponse response) throws IOException {
 
         boolean isMultipart = false;
-        if (request.getContentType() != null && request.getContentType().startsWith("multipart/form-data")) {
+        if (request.getContentType() != null && (request.getContentType().startsWith("multipart/form-data") || request.getContentType().startsWith("application/x-www-form-urlencoded"))) {
             baseRequest.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, MULTI_PART_CONFIG);
             isMultipart = true;
         }
@@ -174,7 +174,7 @@ class ProcessServer extends AbstractHandler {
                 ExecutorService executor = Executors.newCachedThreadPool();
                 executor.submit(download);
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No URL provided.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty URL provided.");
             }
         }
     }
@@ -226,7 +226,9 @@ class ProcessServer extends AbstractHandler {
 
     //add an alias for the requester if they don't already have one
     private void alias(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (can_alias(request) && !request.getParameter("alias").equals("")) {
+        if (request.getParameter("alias").equals("")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty alias provided.");
+        } else if (can_alias(request)) {
             process_queue.alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
             System.out.println("Added alias " + process_queue.alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
         } else {
@@ -237,12 +239,12 @@ class ProcessServer extends AbstractHandler {
 
     //return true if the requester has an alias set
     private boolean can_alias(HttpServletRequest request) {
-        return !process_queue.alias_map.containsKey(request.getParameter("ip"));
+        return !process_queue.alias_map.containsKey(request.getRemoteAddr());
     }
 
     //let the requester know if they have an alias set
     private void can_alias(HttpServletRequest request, PrintWriter out) {
-        if (process_queue.alias_map.containsKey(request.getParameter("ip"))) {
+        if (process_queue.alias_map.containsKey(request.getRemoteAddr())) {
             out.print("cannotalias");
         } else {
             out.print("canalias");

@@ -55,19 +55,16 @@
 			</div>
 
 			<div class="login-form">
-				<div class="alert alert-info" id"size-error">
+				<div class="alert alert-info" id"error">
 					Make queueing your favourite memes easier with the new <a target="blank" href="https://chrome.google.com/webstore/detail/music-get-autoqueue/iomcfpdngiolnefjdehdaoanlilbjiml">chrome extension</a>!
 				</div>
-				<?php if ($_GET['error'] == "limit") {?>
-				<div class="alert alert-danger" id="size-error">
-					You already have the maximum number of items queued!
+				<div class="alert alert-danger" id="error" style="display:none">
 				</div>
-				<?php }?>
 				<form action="http://<?=$server_name?>/api/add" method="post" enctype="multipart/form-data">
 					<div class="row">
 						<div class="col-xs-6">
 			  				<div class="form-group">
-								<input type="file" class="form-control" name="file"/>
+								<input type="file" class="form-control" name="file" id="fileField"/>
 							</div>
 						</div>
 						<div class="col-xs-6">
@@ -77,11 +74,11 @@
 						</div>
 					</div>
 				</form>
-				<form action="http://<?=$server_name?>/api/url" method="post" enctype="multipart/form-data">
+				<form action="Javascript:sendURL()" method="post" enctype="multipart/form-data">
 					<div class="row">
 						<div class="col-xs-6">
 							<div class="form-group">
-								<input type="text" class="form-control" name="url" placeholder="Youtube/Vimeo etc. URL"/>
+								<input type="text" class="form-control" name="url" id="url" placeholder="Youtube/Vimeo etc. URL"/>
 							</div>
 						</div>
 						<div class="col-xs-6">
@@ -102,13 +99,13 @@
 				</div>
 
 				<?php if (file_get_contents("http://localhost/api/alias?ip=" . rawurlencode($client_ip)) == "canalias") {?>
-				<div class="form-row">
+				<div class="form-row" id="aliasPane">
 					<h6>Set an alias for yourself (once per LAN)</h6>
-					<form action="http://<?=$server_name?>/api/alias/add" method="post" enctype="multipart/form-data">
+					<form action="Javascript:setAlias()" method="post" enctype="multipart/form-data">
 						<div class="row">
 							<div class="col-xs-6">
 								<div class="form-group">
-									<input type="text" class="form-control" name="alias" placeholder="What would you like to be called?"/>
+									<input type="text" class="form-control" name="alias" id="alias" placeholder="What would you like to be called?"/>
 								</div>
 							</div>
 							<div class="col-xs-6">
@@ -143,6 +140,43 @@
 				$.ajax({url: 'http://<?=$server_name?>/downloading.php', method: 'POST'})
 					.done(function(data){document.getElementById("downloading").innerHTML = data ;});
 			}, 1000);
+		}
+		function sendFile(){};
+		function sendURL(){
+			var request = new XMLHttpRequest();
+			var postData = "url=" + document.getElementById("url").value;
+			request.onload = function () {
+				if (request.status == 200) {
+					document.getElementById("url").value = "";
+					document.getElementById("error").style.display = "none";
+				} else if (request.status == 403) {
+					document.getElementById("error").textContent = "You have exceeded the item limit!";
+					document.getElementById("error").style.display = "inherit";
+				} else {
+					document.getElementById("error").textContent = "There was a problem submitting your URL!";
+					document.getElementById("error").style.display = "inherit";
+				}
+			}
+			request.open('POST', 'http://music.lan/api/url', true);
+			request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			request.send(postData);
+		};
+		function setAlias(){
+			var request = new XMLHttpRequest();
+			var postData = "alias=" + document.getElementById("alias").value;
+			
+			request.onload = function () {
+				if (request.status == 200) {
+					document.getElementById("aliasPane").style.display = "none";
+					document.getElementById("error").style.display = "none";
+				} else {
+					document.getElementById("error").textContent = "There was a problem setting your alias!";
+					document.getElementById("error").style.display = "inherit";
+				}
+			}
+			request.open('POST', 'http://music.lan/api/alias/add', true);
+			request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			request.send(postData);
 		}
 		</script>
 	</body>
