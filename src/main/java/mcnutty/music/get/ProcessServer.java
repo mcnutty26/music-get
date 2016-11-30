@@ -11,10 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -37,10 +34,12 @@ class ProcessServer extends AbstractHandler {
     public void handle(String target,
                        Request baseRequest,
                        HttpServletRequest request,
-                       HttpServletResponse response) throws IOException,
-            ServletException {
+                       HttpServletResponse response) throws IOException {
+
+        boolean isMultipart = false;
         if (request.getContentType() != null && request.getContentType().startsWith("multipart/form-data")) {
             baseRequest.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, MULTI_PART_CONFIG);
+            isMultipart = true;
         }
 
         response.setContentType("text/html; charset=utf-8");
@@ -50,54 +49,55 @@ class ProcessServer extends AbstractHandler {
         PrintWriter out = response.getWriter();
 
         //select which endpoint the user requested
-        switch (target) {
-            case "/list":
-                list(out);
-                break;
-            case "/last":
-                last(out);
-                break;
-            case "/current":
-                current(out);
-                break;
-            case "/add":
-                if (add(request)) {
-                    redirect(response, "index", "");
-                } else {
-                    redirect(response, "index", "error=limit");
-                }
-                break;
-            case "/url":
-                if (process_queue.ip_can_add(request.getRemoteAddr())) {
-                    url(request);
-                    redirect(response, "index", "");
-                } else {
-                    redirect(response, "index", "error=limit");
-                }
-                break;
-            case "/downloading":
-                downloading(out);
-            case "/remove":
-                remove(request);
-                break;
-            case "/alias/add":
-                alias(request);
-                redirect(response, "index", "");
-                break;
-            case "/alias":
-                can_alias(request, out);
-                break;
-            case "/admin/kill":
-                kill(request);
-                break;
-            case "/admin/remove":
-                admin_remove(request);
-                break;
-            case "/admin/alias":
-                admin_alias(request);
-                redirect(response, "admin", "");
-            default:
-                out.println("Welcome to the music-get backend!");
+        try {
+            switch (target) {
+                case "/list":
+                    list(out);
+                    break;
+                case "/last":
+                    last(out);
+                    break;
+                case "/current":
+                    current(out);
+                    break;
+                case "/add":
+                    if (isMultipart) {
+                        add(request, response);
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Expected multipart/form-data.");
+                    }
+                    break;
+                case "/url":
+                    if (isMultipart) {
+                        url(request, response);
+                    } else {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Expected multipart/form-data.");
+                    }
+                    break;
+                case "/downloading":
+                    downloading(out);
+                case "/remove":
+                    remove(request);
+                    break;
+                case "/alias/add":
+                    alias(request, response);
+                    break;
+                case "/alias":
+                    can_alias(request, out);
+                    break;
+                case "/admin/kill":
+                    kill(request);
+                    break;
+                case "/admin/remove":
+                    admin_remove(request, response);
+                    break;
+                case "/admin/alias":
+                    admin_alias(request, response);
+                default:
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Requested endpoint does not exist.");
+            }
+        } catch (IOException | ServletException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
         baseRequest.setHandled(true);
@@ -138,40 +138,44 @@ class ProcessServer extends AbstractHandler {
     }
 
     //add an uploaded file to the queue 
-    private boolean add(HttpServletRequest request) {
+    private void add(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String guid = UUID.randomUUID().toString();
         Part uploaded_file;
-        boolean added_file = false;
-        try {
-            uploaded_file = request.getPart("file");
+        uploaded_file = request.getPart("file");
+        if (uploaded_file == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file provided.");
+        } else {
             uploaded_file.write(directory + guid);
             QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
             if (!new_item.real_name.equals("")) {
-                added_file = process_queue.new_item(new_item);
-                if (added_file) {
+                if (process_queue.new_item(new_item)) {
                     System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
                 } else {
-                    System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip + " - too many items queued");
-                    try {
-                        Files.delete(Paths.get(directory + new_item.disk_name));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip);
+                    Files.delete(Paths.get(directory + new_item.disk_name));
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Client has too many items queued");
                 }
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file provided");
             }
-        } catch (IOException | ServletException e) {
-            e.printStackTrace();
-            return false;
         }
-        return added_file;
     }
 
     //download a video at the supplied URL
-    private void url(HttpServletRequest request) {
-        if (!request.getParameter("url").equals("")) {
-            YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
-            ExecutorService executor = Executors.newCachedThreadPool();
-            executor.submit(download);
+    private void url(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String param = request.getParameter("url");
+        if (param == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No URL provided.");
+        } else if (!process_queue.ip_can_add(request.getRemoteAddr())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Client has too many items queued.");
+        } else {
+            if (!request.getParameter("url").equals("")) {
+                YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
+                ExecutorService executor = Executors.newCachedThreadPool();
+                executor.submit(download);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No URL provided.");
+            }
         }
     }
 
@@ -194,55 +198,40 @@ class ProcessServer extends AbstractHandler {
         }
     }
 
-    //redirect the requester back to the front end
-    private void redirect(HttpServletResponse response, String page, String args) {
-        String name = "music.lan";
-		String addon = "";
-		if (!args.equals("")){
-			addon = "?" + args;
-		}
-        String url = "http://" + name + "/" + page + ".php" + addon;
-        response.setContentLength(0);
-        try {
-            response.sendRedirect(url);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     //admin: kill the currently playing item
-    private void kill(HttpServletRequest request) {
+    private void kill(HttpServletRequest request) throws IOException {
         if (auth(request.getParameter("pw"))) {
-            try {
-                Runtime.getRuntime().exec("killall mplayer");
-                System.out.println("Current item killed");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Runtime.getRuntime().exec("killall mplayer");
+            System.out.println("Current item killed");
         }
     }
 
     //admin: remove any item from the queue
-    private void admin_remove(HttpServletRequest request) {
-        QueueItem match = null;
-        for (QueueItem item : process_queue.bucket_queue) {
-            if (item.disk_name.equals(request.getParameter("guid"))) {
-                match = item;
+    private void admin_remove(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (auth(request.getParameter("pw"))) {
+            QueueItem match = null;
+            for (QueueItem item : process_queue.bucket_queue) {
+                if (item.disk_name.equals(request.getParameter("guid"))) {
+                    match = item;
+                }
             }
-        }
-        if (match != null && auth(request.getParameter("pw"))) {
-            process_queue.delete_item(match);
-            System.out.println("Item " + match.real_name + " removed from queue by admin");
+            if (match != null) {
+                process_queue.delete_item(match);
+                System.out.println("Item " + match.real_name + " removed from queue by admin");
+            }
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is not authenticated.");
         }
     }
 
     //add an alias for the requester if they don't already have one
-    private void alias(HttpServletRequest request) {
+    private void alias(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (can_alias(request) && !request.getParameter("alias").equals("")) {
             process_queue.alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
             System.out.println("Added alias " + process_queue.alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
         } else {
             System.out.println("Rejected alias from " + request.getRemoteAddr() + " - user already has an alias");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "User already has an alias set.");
         }
     }
 
@@ -261,7 +250,7 @@ class ProcessServer extends AbstractHandler {
     }
 
     //admin: force unset or force change the alias of a user
-    private void admin_alias(HttpServletRequest request) {
+    private void admin_alias(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (auth(request.getParameter("pw"))) {
             if (request.getParameter("alias").equals("")) {
                 process_queue.alias_map.remove(request.getParameter("ip"));
@@ -270,20 +259,18 @@ class ProcessServer extends AbstractHandler {
                 process_queue.alias_map.replace(request.getParameter("ip"), request.getParameter("alias"));
                 System.out.println("Alias changed for " + request.getParameter("ip"));
             }
+        } else {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is not authenticated");
         }
     }
 
-    private boolean auth(String user_password) {
+    private boolean auth(String user_password) throws IOException {
         Properties prop = new Properties();
         InputStream input;
-        try {
-            input = new FileInputStream("config.properties");
-            prop.load(input);
-            if (prop.getProperty("password").equals(user_password)) {
-                return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        input = new FileInputStream("config.properties");
+        prop.load(input);
+        if (prop.getProperty("password").equals(user_password)) {
+            return true;
         }
         return false;
     }

@@ -58,6 +58,12 @@ class YoutubeDownload implements Runnable {
                 dl = downloader.start();
                 dl.waitFor();
 
+                ProcessBuilder renamer = new ProcessBuilder("/bin/bash", "-c", "mv " + directory + guid + ".* " + directory + guid);
+                Process rn;
+                rn = renamer.start();
+                rn.waitFor();
+                System.out.println(renamer.command().toString());
+
                 String real_name = sb.toString();
                 System.out.println("Downloaded file " + real_name + " for " + ip);
                 if (!process_queue.new_item(new QueueItem(guid, real_name, ip)))
