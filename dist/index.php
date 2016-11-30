@@ -60,11 +60,11 @@
 				</div>
 				<div class="alert alert-danger" id="error" style="display:none">
 				</div>
-				<form action="http://<?=$server_name?>/api/add" method="post" enctype="multipart/form-data">
+				<form action="Javascript:sendFile()" method="post" enctype="multipart/form-data" id="fileForm">
 					<div class="row">
 						<div class="col-xs-6">
 			  				<div class="form-group">
-								<input type="file" class="form-control" name="file" id="fileField"/>
+								<input type="file" class="form-control" name="file" id="file"/>
 							</div>
 						</div>
 						<div class="col-xs-6">
@@ -141,7 +141,25 @@
 					.done(function(data){document.getElementById("downloading").innerHTML = data ;});
 			}, 1000);
 		}
-		function sendFile(){};
+		function sendFile(){
+			var fileForm = document.getElementById('fileForm');
+			var request = new XMLHttpRequest();
+			request.onload = function () {
+				if (request.status == 200) {
+					document.getElementById("file").value = "";
+					document.getElementById("error").style.display = "none";
+				} else if (request.status == 403) {
+					document.getElementById("error").textContent = "You have exceeded the item limit!";
+					document.getElementById("error").style.display = "inherit";
+				} else {
+					document.getElementById("error").textContent = "There was a problem submitting your file!";
+					document.getElementById("error").style.display = "inherit";
+				}
+			}
+			formData = new FormData(fileForm);
+			request.open('POST', 'http://music.lan/api/add', true);
+			request.send(formData);
+		}
 		function sendURL(){
 			var request = new XMLHttpRequest();
 			var postData = "url=" + document.getElementById("url").value;

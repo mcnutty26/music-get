@@ -37,7 +37,8 @@ class ProcessServer extends AbstractHandler {
                        HttpServletResponse response) throws IOException {
 
         boolean isMultipart = false;
-        if (request.getContentType() != null && (request.getContentType().startsWith("multipart/form-data") || request.getContentType().startsWith("application/x-www-form-urlencoded"))) {
+        if (request.getContentType() != null && (request.getContentType().startsWith("multipart/form-data")
+                || request.getContentType().startsWith("application/x-www-form-urlencoded"))) {
             baseRequest.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, MULTI_PART_CONFIG);
             isMultipart = true;
         }
