@@ -31,7 +31,7 @@ class YoutubeDownload implements Runnable {
         }
 
         //set the item as downloading
-        System.out.println("Starting download of video " + URL + " queued by " + ip);
+        System.out.println(ip + " starting downloading video " + URL);
         QueueItem temp = new QueueItem("null", URL, ip);
         process_queue.bucket_youtube.add(temp);
         String guid = UUID.randomUUID().toString();
@@ -65,14 +65,14 @@ class YoutubeDownload implements Runnable {
                 rn.waitFor();
 
                 String real_name = sb.toString();
-                System.out.println("Downloaded file " + real_name + " for " + ip);
+                System.out.println(ip + " finished downloading file " + real_name);
                 if (!process_queue.new_item(new QueueItem(guid, real_name, ip)))
                 {
-                    System.out.println("Rejected file " + real_name + " from " + ip + " - too many items queued");
+                    System.out.println(ip + " had file " + real_name + " rejected (had too many items queued)");
                     Files.delete(Paths.get(directory + guid));
                 }
             } else {
-                System.out.println("Could not download video " + URL + " queued by " + ip);
+                System.out.println(ip + " failed download of " + URL);
             }
 
             //set the download as completed

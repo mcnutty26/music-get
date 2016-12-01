@@ -150,9 +150,9 @@ class ProcessServer extends AbstractHandler {
             QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
             if (!new_item.real_name.equals("")) {
                 if (process_queue.new_item(new_item)) {
-                    System.out.println("Added file " + new_item.real_name + " from " + new_item.ip);
+                    System.out.println(new_item.ip + "added file " + new_item.real_name);
                 } else {
-                    System.out.println("Rejected file " + new_item.real_name + " from " + new_item.ip);
+                    System.out.println(new_item.ip + "rejected file " + new_item.real_name);
                     Files.delete(Paths.get(directory + new_item.disk_name));
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Client has too many items queued");
                 }
@@ -203,7 +203,7 @@ class ProcessServer extends AbstractHandler {
     private void kill(HttpServletRequest request) throws IOException {
         if (auth(request.getParameter("pw"))) {
             Runtime.getRuntime().exec("killall mplayer");
-            System.out.println("Current item killed");
+            System.out.println(request.getRemoteAddr() + " (admin) killed item " + process_queue.bucket_queue.peek().real_name + " from " + process_queue.bucket_queue.peek().ip);
         }
     }
 
@@ -218,7 +218,7 @@ class ProcessServer extends AbstractHandler {
             }
             if (match != null) {
                 process_queue.delete_item(match);
-                System.out.println("Item " + match.real_name + " removed from queue by admin");
+                System.out.println(request.getRemoteAddr() + " (admin) removed item " + match.real_name + " queued by " + match.ip);
             }
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is not authenticated.");
@@ -231,9 +231,9 @@ class ProcessServer extends AbstractHandler {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty alias provided.");
         } else if (can_alias(request)) {
             process_queue.alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
-            System.out.println("Added alias " + process_queue.alias_map.get(request.getRemoteAddr()) + " for user at " + request.getRemoteAddr());
+            System.out.println(request.getRemoteAddr() + " added alias " + process_queue.alias_map.get(request.getRemoteAddr()));
         } else {
-            System.out.println("Rejected alias from " + request.getRemoteAddr() + " - user already has an alias");
+            System.out.println(request.getRemoteAddr() + " had new alias rejected (they already have one)");
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User already has an alias set.");
         }
     }
@@ -257,10 +257,10 @@ class ProcessServer extends AbstractHandler {
         if (auth(request.getParameter("pw"))) {
             if (request.getParameter("alias").equals("")) {
                 process_queue.alias_map.remove(request.getParameter("ip"));
-                System.out.println("Alias reset for " + request.getParameter("ip"));
+                System.out.println(request.getRemoteAddr() + " removed alias for " + request.getParameter("ip"));
             } else {
                 process_queue.alias_map.replace(request.getParameter("ip"), request.getParameter("alias"));
-                System.out.println("Alias changed for " + request.getParameter("ip"));
+                System.out.println(request.getRemoteAddr() + " (admin) changed alias for " + request.getParameter("ip") + " to " + request.getParameter("alias"));
             }
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is not authenticated");

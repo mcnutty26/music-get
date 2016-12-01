@@ -111,7 +111,7 @@ public class MusicGet {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                System.out.println("Playing " + next_item.real_name);
+                System.out.println(next_item.ip + " playing " + next_item.real_name);
                 process_queue.set_played(next_item);
                 process_queue.save_queue();
                 Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
