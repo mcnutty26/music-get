@@ -48,7 +48,7 @@ One of the (many) music server implementations for UWCS. While the other options
 * [PHP](https://github.com/php/php-src)
 
 ##Licenses:
-* music-get is licensed under the GNU GPL v3
+* music-get is distributed under the GNU GPL v3
 * [Flat-UI](https://github.com/designmodo/Flat-UI) is licensed under the Creative Commons Attribution 3.0 Unported license (CC BY 3.0)
 * [youtube-dl](https://github.com/rg3/youtube-dl/) is public domain
 * [Jetty](https://github.com/eclipse/jetty.project) is licenced under the Apache Licence 2.0
