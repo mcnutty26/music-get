@@ -56,9 +56,6 @@ public class MusicGet {
         ProcessQueue process_queue = new ProcessQueue();
 
         try {
-            if (args.length > 0 && args[0].equals("clean")){
-                Files.delete(Paths.get("queue.json"));
-            }
             //load an existing queue if possible
             String raw_queue = Files.readAllLines(Paths.get("queue.json")).toString();
             JSONArray queue_state = new JSONArray(raw_queue);
@@ -125,11 +122,13 @@ public class MusicGet {
                 try {
                     p.waitFor(timeout, TimeUnit.SECONDS);
                     Files.delete(Paths.get(directory + next_item.disk_name));
+                    process_queue.save_queue();
                 } catch (java.nio.file.NoSuchFileException e) {
                     System.out.println("Skipping item " + next_item.disk_name + " (file does not exist)");
                 }
             } else {
                 process_queue.bucket_played.clear();
+                process_queue.save_queue();
             }
             Thread.sleep(1000);
         }
