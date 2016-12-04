@@ -99,6 +99,7 @@ class ProcessServer extends AbstractHandler {
             }
         } catch (IOException | ServletException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
         }
 
         baseRequest.setHandled(true);
@@ -150,9 +151,9 @@ class ProcessServer extends AbstractHandler {
             QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
             if (!new_item.real_name.equals("")) {
                 if (process_queue.new_item(new_item)) {
-                    System.out.println(new_item.ip + "added file " + new_item.real_name);
+                    System.out.println(new_item.ip + " added file " + new_item.real_name);
                 } else {
-                    System.out.println(new_item.ip + "rejected file " + new_item.real_name);
+                    System.out.println(new_item.ip + " rejected file " + new_item.real_name);
                     Files.delete(Paths.get(directory + new_item.disk_name));
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Client has too many items queued");
                 }
@@ -203,7 +204,14 @@ class ProcessServer extends AbstractHandler {
     private void kill(HttpServletRequest request) throws IOException {
         if (auth(request.getParameter("pw"))) {
             Runtime.getRuntime().exec("killall mplayer");
-            System.out.println(request.getRemoteAddr() + " (admin) killed item " + process_queue.bucket_queue.peek().real_name + " from " + process_queue.bucket_queue.peek().ip);
+
+            if (!process_queue.bucket_played.isEmpty()) {
+                QueueItem last = new QueueItem();
+                for (QueueItem item: process_queue.bucket_played) {
+                    last = item;
+                }
+                System.out.println(request.getRemoteAddr() + " (admin) killed item " + last.real_name + " from " + last.ip);
+            }
         }
     }
 
@@ -272,9 +280,6 @@ class ProcessServer extends AbstractHandler {
         InputStream input;
         input = new FileInputStream("config.properties");
         prop.load(input);
-        if (prop.getProperty("password").equals(user_password)) {
-            return true;
-        }
-        return false;
+        return prop.getProperty("password").equals(user_password);
     }
 }

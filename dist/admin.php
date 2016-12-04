@@ -135,26 +135,24 @@
 
 					<div class="form-row">
 						<h6>Change the alias of a user</h6>
-						<form action="http://<?=$server_name?>/api/admin/alias" method="post" enctype="multipart/form-data">
 							<input type="hidden" name="pw" value="<?=$_SESSION['login']?>" />
 							<div class="row">
 								<div class="col-xs-4">
 									<div class="form-group">
-										<input type="text" class="form-control" name="ip" placeholder="IP Address"/>
+										<input type="text" class="form-control" name="ip" id="ip" placeholder="IP Address"/>
 									</div>
 								</div>
 								<div class="col-xs-4">
 									<div class="form-group">
-										<input type="text" class="form-control" name="alias" placeholder="New alias (leave blank to reset)"/>
+										<input type="text" class="form-control" name="alias" id="alias" placeholder="New alias (leave blank to reset)"/>
 									</div>
 								</div>
 								<div class="col-xs-4">
 									<div class="form-group">
-										<input type="submit" class="btn btn-primary btn-lg btn-block" value="Set alias">
+										<a onclick="set_alias()" class="btn btn-primary btn-lg btn-block" href="#">Set alias</a>
 									</div>
 								</div>
 							</div>
-						</form>
 					</div>
 
 					<div class="row">
@@ -182,6 +180,15 @@
 								data: {'pw' : '<?=$pw?>'}})
 								location.replace('http://<?=$server_name?>/admin.php');
 						}
+						function set_alias() {
+							console.log("start");
+							$.ajax({url: 'http://<?=$server_name?>/api/admin/alias',
+								method: 'POST',
+								data: {'pw' : '<?=$pw?>', 'alias' : document.getElementById("alias").value, 
+									'ip' : document.getElementById("ip").value}})
+								location.replace('http://<?=$server_name?>/admin.php');
+						}
+
 					</script>
 				<?php } else { ?>
 				<form method="post" action="admin.php">

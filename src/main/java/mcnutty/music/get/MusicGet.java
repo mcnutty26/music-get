@@ -71,6 +71,10 @@ public class MusicGet {
                 loaded_item.real_name = item.getString("name");
                 loaded_item.disk_name = item.getString("guid");
                 loaded_queue.add(loaded_item);
+                if (!process_queue.alias_map.containsKey(item.getString("ip")) && !item.getString("alias").equals("")) {
+                    process_queue.alias_map.put(item.getString("ip"), item.getString("alias"));
+                    System.out.println("Restored alias for " + item.getString("ip") + "/" + item.getString("alias"));
+                }
             }
             process_queue.bucket_queue = loaded_queue;
             System.out.println("Loaded queue from disk\n");
@@ -98,6 +102,7 @@ public class MusicGet {
 
         //wit for the web server to spool up
         Thread.sleep(1000);
+        System.out.println("");
 
         //read items from the queue and play them
         while (true) {
@@ -120,8 +125,8 @@ public class MusicGet {
                 try {
                     p.waitFor(timeout, TimeUnit.SECONDS);
                     Files.delete(Paths.get(directory + next_item.disk_name));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (java.nio.file.NoSuchFileException e) {
+                    System.out.println("Skipping item " + next_item.disk_name + " (file does not exist)");
                 }
             } else {
                 process_queue.bucket_played.clear();

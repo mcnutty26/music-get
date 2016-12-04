@@ -65,7 +65,7 @@ class ProcessQueue {
 
     //return the next item in the bucket to be played
     QueueItem next_item() {
-        //Return an enpty item if there is nothing to play
+        //Return an empty item if there is nothing to play
         if (bucket_queue.isEmpty()) {
             return new QueueItem();
         }
