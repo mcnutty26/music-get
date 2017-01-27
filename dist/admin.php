@@ -73,9 +73,9 @@
 								<td></td>
 							</tr>
 							<?php
-								$json = file_get_contents("http://localhost/api/list");
+								$json = file_get_contents("http://music.lan/api/list");
 								$data = json_decode($json, true);
-								$json_last = file_get_contents("http://localhost/api/last");
+								$json_last = file_get_contents("http://music.lan/api/last");
 								$data_last = json_decode($json_last, true);
 								$queue = array();
 								$queue_temp = array();
