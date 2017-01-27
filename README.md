@@ -8,11 +8,12 @@ One of the (many) music server implementations for UWCS. While the other options
   * buckets (the maximum number of tracks queued by each user, default is 4)
   * timeout (the maximum number of seconds a song can play for, default is 547)
   * directory (the location on disk where uploaded songs are stored, default is `/tmp/musicserver/`)
-* Create an apache virtualhost with the document root pointed at the music-get `dist` folder (a sample config is provided in `dist/apache`)
+* Create an Apache virtualhost with the document root pointed at the music-get `dist` folder (a sample config is provided in `dist/apache`)
+* Enable `mod_rewrite`, `mod_proxy`, and `mod_proxy_html` in Apache (`a2enmod proxy` etc.)
 * Run `music.get` (this will pull any repo updates, build the project, update youtube-dl, and start the server back end)
 
 ##API:
-###The API is exposed on port 8080, and reverse proxied though apache as /api/ on port 80.
+###The API is exposed on port 8080, and proxied though Apache as /api/ on port 80.
 ##### /list returns a JSON array representing the current queue 
 ```curl music.lan/api/list```
 ##### /last returns a JSON array representing the played items in the current bucket
