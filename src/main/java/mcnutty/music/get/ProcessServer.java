@@ -203,7 +203,7 @@ class ProcessServer extends AbstractHandler {
     //admin: kill the currently playing item
     private void kill(HttpServletRequest request) throws IOException {
         if (auth(request.getParameter("pw"))) {
-            Runtime.getRuntime().exec("killall mplayer");
+            Runtime.getRuntime().exec("killall mpv");
 
             if (!process_queue.bucket_played.isEmpty()) {
                 QueueItem last = new QueueItem();

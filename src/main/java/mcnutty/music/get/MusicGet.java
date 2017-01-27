@@ -116,8 +116,9 @@ public class MusicGet {
                 System.out.println(next_item.ip + " playing " + next_item.real_name);
                 process_queue.set_played(next_item);
                 process_queue.save_queue();
-                Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mplayer -fs -quiet -af volnorm=2:0.25 "
+                Process p = Runtime.getRuntime().exec("timeout " + timeout + "s mpv -vo xv -fs -quiet --af=drc=2:0.25 "
                         + directory + next_item.disk_name);
+
 
                 try {
                     p.waitFor(timeout, TimeUnit.SECONDS);
