@@ -98,7 +98,7 @@
 					</div>
 				</div>
 
-				<?php if (file_get_contents("http://localhost/api/alias?ip=" . rawurlencode($client_ip)) == "canalias") {?>
+				<?php if (file_get_contents("http://music.lan/api/alias?ip=" . rawurlencode($client_ip)) == "canalias") {?>
 				<div class="form-row" id="aliasPane">
 					<h6>Set an alias for yourself (once per LAN)</h6>
 					<form action="Javascript:setAlias()" method="post" enctype="multipart/form-data">
