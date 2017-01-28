@@ -40,11 +40,11 @@ One of the (many) music server implementations for UWCS. While the other options
 ```curl music.lan/api/admin/alias -F "ip=192.168.1.0" [-F "alias=newalias"] -F "pw=letmein123"```
 ##Dependencies (with links to source code):
 * [Flat-UI](https://github.com/designmodo/Flat-UI) (included in the `dist` directory)
-* [Jetty](https://github.com/eclipse/jetty.project) 
-* [JSON-java](https://github.com/stleary/JSON-java) 
+* [Jetty](https://github.com/eclipse/jetty.project) (included in the dist directory)
+* [JSON-java](https://github.com/stleary/JSON-java) (included in the dist directory)
 * [youtube-dl](https://github.com/rg3/youtube-dl/) (included in the `dist` directory)
 * [JRE 8](http://download.java.net/openjdk/jdk8/)
-* [MPlayer](https://www.mplayerhq.hu/design7/dload.html)
+* [mpv](https://github.com/mpv-player/mpv)
 * [Apache](https://github.com/apache/httpd)
 * [PHP](https://github.com/php/php-src)
 
