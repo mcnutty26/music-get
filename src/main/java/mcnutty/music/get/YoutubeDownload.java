@@ -39,7 +39,7 @@ class YoutubeDownload implements Runnable {
         //get the name of the item
         ProcessBuilder pb = new ProcessBuilder(
                 Paths.get("").toAbsolutePath().toString() + "/youtube-dl", "--get-filename"
-                , "-o%(title)s", "--restrict-filenames", "--no-playlist", URL);
+                , "-o%(title)s", "--no-playlist", URL);
         Process p;
         try {
             p = pb.start();
