@@ -148,7 +148,7 @@ class ProcessServer extends AbstractHandler {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No file provided.");
         } else {
             uploaded_file.write(directory + guid);
-            QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getRemoteAddr());
+            QueueItem new_item = new QueueItem(guid, extractFileName(uploaded_file), request.getHeader("X-Forwarded-For"));
             if (!new_item.real_name.equals("")) {
                 if (process_queue.new_item(new_item)) {
                     System.out.println(new_item.ip + " added file " + new_item.real_name);
@@ -168,11 +168,11 @@ class ProcessServer extends AbstractHandler {
         String param = request.getParameter("url");
         if (param == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No URL provided.");
-        } else if (!process_queue.ip_can_add(request.getRemoteAddr())) {
+        } else if (!process_queue.ip_can_add(request.getHeader("X-Forwarded-For"))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Client has too many items queued.");
         } else {
-            if (!request.getParameter("url").equals("")) {
-                YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getRemoteAddr(), directory);
+            if (!request.getHeader("X-Forwarded-For").equals("")) {
+                YoutubeDownload download = new YoutubeDownload(request.getParameter("url"), process_queue, request.getHeader("X-Forwarded-For"), directory);
                 ExecutorService executor = Executors.newCachedThreadPool();
                 executor.submit(download);
             } else {
@@ -190,7 +190,7 @@ class ProcessServer extends AbstractHandler {
     private void remove(HttpServletRequest request) {
         QueueItem match = null;
         for (QueueItem item : process_queue.bucket_queue) {
-            if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getRemoteAddr())) {
+            if (item.disk_name.equals(request.getParameter("guid")) && item.ip.equals(request.getHeader("X-Forwarded-For"))) {
                 match = item;
             }
         }
@@ -210,7 +210,7 @@ class ProcessServer extends AbstractHandler {
                 for (QueueItem item: process_queue.bucket_played) {
                     last = item;
                 }
-                System.out.println(request.getRemoteAddr() + " (admin) killed item " + last.real_name + " from " + last.ip);
+                System.out.println(request.getHeader("X-Forwarded-For") + " (admin) killed item " + last.real_name + " from " + last.ip);
             }
         }
     }
@@ -226,7 +226,7 @@ class ProcessServer extends AbstractHandler {
             }
             if (match != null) {
                 process_queue.delete_item(match);
-                System.out.println(request.getRemoteAddr() + " (admin) removed item " + match.real_name + " queued by " + match.ip);
+                System.out.println(request.getHeader("X-Forwarded-For") + " (admin) removed item " + match.real_name + " queued by " + match.ip);
             }
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is not authenticated.");
@@ -238,22 +238,22 @@ class ProcessServer extends AbstractHandler {
         if (request.getParameter("alias").equals("")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty alias provided.");
         } else if (can_alias(request)) {
-            process_queue.alias_map.put(request.getRemoteAddr(), request.getParameter("alias"));
-            System.out.println(request.getRemoteAddr() + " added alias " + process_queue.alias_map.get(request.getRemoteAddr()));
+            process_queue.alias_map.put(request.getHeader("X-Forwarded-For"), request.getParameter("alias"));
+            System.out.println(request.getHeader("X-Forwarded-For") + " added alias " + process_queue.alias_map.get(request.getHeader("X-Forwarded-For")));
         } else {
-            System.out.println(request.getRemoteAddr() + " had new alias rejected (they already have one)");
+            System.out.println(request.getHeader("X-Forwarded-For") + " had new alias rejected (they already have one)");
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User already has an alias set.");
         }
     }
 
     //return true if the requester has an alias set
     private boolean can_alias(HttpServletRequest request) {
-        return !process_queue.alias_map.containsKey(request.getRemoteAddr());
+        return !process_queue.alias_map.containsKey(request.getHeader("X-Forwarded-For"));
     }
 
     //let the requester know if they have an alias set
     private void can_alias(HttpServletRequest request, PrintWriter out) {
-        if (process_queue.alias_map.containsKey(request.getRemoteAddr())) {
+        if (process_queue.alias_map.containsKey(request.getHeader("X-Forwarded-For"))) {
             out.print("cannotalias");
         } else {
             out.print("canalias");
@@ -265,10 +265,10 @@ class ProcessServer extends AbstractHandler {
         if (auth(request.getParameter("pw"))) {
             if (request.getParameter("alias").equals("")) {
                 process_queue.alias_map.remove(request.getParameter("ip"));
-                System.out.println(request.getRemoteAddr() + " removed alias for " + request.getParameter("ip"));
+                System.out.println(request.getHeader("X-Forwarded-For") + " removed alias for " + request.getParameter("ip"));
             } else {
                 process_queue.alias_map.replace(request.getParameter("ip"), request.getParameter("alias"));
-                System.out.println(request.getRemoteAddr() + " (admin) changed alias for " + request.getParameter("ip") + " to " + request.getParameter("alias"));
+                System.out.println(request.getHeader("X-Forwarded-For") + " (admin) changed alias for " + request.getParameter("ip") + " to " + request.getParameter("alias"));
             }
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "User is not authenticated");
