@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ class ProcessQueue {
         }
 
         //Return the next item in the current bucket
-        ArrayList<String> played_ips = bucket_played.stream().map(item -> item.ip).collect(Collectors.toCollection(ArrayList::new));
+        List<String> played_ips = bucket_played.stream().map(item -> item.ip).collect(Collectors.toList());
         for (QueueItem item : bucket_queue) {
             if (!played_ips.contains(item.ip)) {
                 return item;
