@@ -29,6 +29,12 @@ class ProcessQueue {
         alias_map = new HashMap<>();
     }
 
+    //return true if the requester has an alias set
+    boolean has_alias(String ip) {
+        System.out.println(ip + "!!!");
+        return alias_map.containsKey(ip);
+    }
+
     boolean ip_can_add(String ip) {
         //Check the max number of buckets
         Properties prop = new Properties();

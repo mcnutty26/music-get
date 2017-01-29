@@ -81,10 +81,10 @@ class ProcessServer extends AbstractHandler {
                     remove(request);
                     break;
                 case "/alias/add":
-                    alias(request, response);
+                    add_alias(request, response);
                     break;
                 case "/alias":
-                    can_alias(request, out);
+                    can_alias(request, response, out);
                     break;
                 case "/admin/kill":
                     kill(request);
@@ -234,10 +234,10 @@ class ProcessServer extends AbstractHandler {
     }
 
     //add an alias for the requester if they don't already have one
-    private void alias(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (request.getParameter("alias").equals("")) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty alias provided.");
-        } else if (can_alias(request)) {
+    private void add_alias(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (!request.getParameterMap().containsKey("alias")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No alias provided.");
+        } else if (!process_queue.has_alias(request.getHeader("X-Forwarded-For"))) {
             process_queue.alias_map.put(request.getHeader("X-Forwarded-For"), request.getParameter("alias"));
             System.out.println(request.getHeader("X-Forwarded-For") + " added alias " + process_queue.alias_map.get(request.getHeader("X-Forwarded-For")));
         } else {
@@ -246,17 +246,14 @@ class ProcessServer extends AbstractHandler {
         }
     }
 
-    //return true if the requester has an alias set
-    private boolean can_alias(HttpServletRequest request) {
-        return !process_queue.alias_map.containsKey(request.getHeader("X-Forwarded-For"));
-    }
-
     //let the requester know if they have an alias set
-    private void can_alias(HttpServletRequest request, PrintWriter out) {
-        if (process_queue.alias_map.containsKey(request.getHeader("X-Forwarded-For"))) {
-            out.print("cannotalias");
-        } else {
+    private void can_alias(HttpServletRequest request, HttpServletResponse response, PrintWriter out) throws IOException {
+        if (!request.getParameterMap().containsKey("ip")) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No IP provided.");
+        } else if (!process_queue.has_alias(request.getParameter("ip"))) {
             out.print("canalias");
+        } else {
+            out.print("cannotalias");
         }
     }
 
