@@ -1,6 +1,11 @@
 # music-get
 
-One of the (many) music server implementations for UWCS. While the other options out there may be shinier, music-get is intended to be an easily maintainable alternative prioritising simplicity over extra features. Playing works on a round robin system - each bucket contains at most one item queued by a single IP address. A chrome extension which makes queueing URLs easier is available at [https://github.com/mcnutty26/music-get-autoqueue](https://github.com/mcnutty26/music-get-autoqueue).
+One of the (many) music server implementations for UWCS. While the other options out there may be shinier, music-get is intended to be an easily maintainable alternative prioritising simplicity over extra features. Playing works on a round robin system - each bucket contains at most one item queued by a single IP address. 
+
+##Browser Extensions
+The chrome extension is available at [https://github.com/mcnutty26/music-get-autoqueue](https://github.com/mcnutty26/music-get-autoqueue).
+
+The Firefox extension is available at [https://addons.mozilla.org/en-GB/firefox/addon/music-get-autoqueue](https://addons.mozilla.org/en-GB/firefox/addon/music-get-autoqueue)
 
 ##Setup
 * Create `config.properties` in `dist`, and optionally have it contain the following key=value pairs:
@@ -26,8 +31,8 @@ One of the (many) music server implementations for UWCS. While the other options
 ```curl music.lan/api/url -F "url=https://www.youtube.com/watch?v=QcIy9NiNbmo"```
 ##### /downloading returns a JSON array representing the currently downloading videos (submitted to /url)
 ```curl music.lan/api/downloading```
-##### /alias returns 'canalias' or 'cannotalias' depending on whether the requester has an alias set
-```curl music.lan/api/alias```
+##### /alias accepts an IP address and returns 'canalias' or 'cannotalias' depending on whether that IP has an alias set
+```curl music.lan/api/alias?ip=10.0.0.1```
 ##### /alias/add accepts an alias as multipart/form-data for the requester if they do not have one set
 ```curl music.lan/api/alias/add -F "alias=myalias"```
 ##### /remove accepts a guid as multipart/form-data (obtained from /list) and removes the associated item from the queue if the requesting ip queued that item
