@@ -3,7 +3,9 @@
 One of the (many) music server implementations for UWCS. While the other options out there may be shinier, music-get is intended to be an easily maintainable alternative prioritising simplicity over extra features. Playing works on a round robin system - each bucket contains at most one item queued by a single IP address. 
 
 ##Browser Extensions
-The chrome extension is available at [https://github.com/mcnutty26/music-get-autoqueue](https://github.com/mcnutty26/music-get-autoqueue).
+The extension source is available at [https://github.com/mcnutty26/music-get-autoqueue](https://github.com/mcnutty26/music-get-autoqueue)
+
+The chrome extension is available at [https://chrome.google.com/webstore/detail/music-get-autoqueue/iomcfpdngiolnefjdehdaoanlilbjiml](https://chrome.google.com/webstore/detail/music-get-autoqueue/iomcfpdngiolnefjdehdaoanlilbjiml).
 
 The Firefox extension is available at [https://addons.mozilla.org/en-GB/firefox/addon/music-get-autoqueue](https://addons.mozilla.org/en-GB/firefox/addon/music-get-autoqueue)
 
