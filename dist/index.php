@@ -56,7 +56,7 @@
 
 			<div class="login-form">
 				<div class="alert alert-info" id"error">
-					Make queueing your favourite memes easier with the new <a target="blank" href="https://chrome.google.com/webstore/detail/music-get-autoqueue/iomcfpdngiolnefjdehdaoanlilbjiml">Chrome</a> and <a href="https://addons.mozilla.org/en-GB/firefox/addon/music-get-autoqueue/">Firefox</a> extensions!
+					Make queueing your favourite memes easier with the new <a target="blank" href="https://chrome.google.com/webstore/detail/music-get-autoqueue/iomcfpdngiolnefjdehdaoanlilbjiml">Chrome</a> and <a target="blank" href="https://addons.mozilla.org/en-GB/firefox/addon/music-get-autoqueue/">Firefox</a> extensions!
 				</div>
 				<div class="alert alert-danger" id="error" style="display:none">
 				</div>
