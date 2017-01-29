@@ -31,7 +31,6 @@ class ProcessQueue {
 
     //return true if the requester has an alias set
     boolean has_alias(String ip) {
-        System.out.println(ip + "!!!");
         return alias_map.containsKey(ip);
     }
 
